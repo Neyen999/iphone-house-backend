@@ -22,7 +22,8 @@ public class JwtService {
     public static final String SECRET = "958c4cc9eab74ebd6596777715a7896a3f9f2352c53fa4fd2a215f0fc022b7d0";
 //    public static final int EXPIRATION_TIME = 1000 * 60 * 60 * 12;
     // TODO Poner el tiempo de vencimiento que va
-    public static final int EXPIRATION_TIME = 1000 * 60 * 60; // 1 hora
+//    public static final int EXPIRATION_TIME = 1000 * 60 * 60; // 1 hora
+    public static final int EXPIRATION_TIME = 1000 * 60; // 1 min
 
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
@@ -92,11 +93,17 @@ public class JwtService {
         return Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String getTokenFromHeader(HttpServletRequest req) {
-        String header = req.getHeader("Authorization");
-        String token = header.substring(7);
+    public String obtainTokenFromHeader(HttpServletRequest servletRequest) {
+        String authorizationHeader = servletRequest.getHeader("Authorization");
+        String accessToken = "";
 
-        return token;
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            accessToken = authorizationHeader.substring(7);
+        }
+        if (accessToken.isBlank() || accessToken.isEmpty()) {
+            throw new RuntimeException("Token not found");
+        }
+        return accessToken;
     }
 
     public JwtResponseDTO refreshJwt(String token) {

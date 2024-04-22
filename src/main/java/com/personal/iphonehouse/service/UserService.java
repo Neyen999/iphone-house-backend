@@ -37,6 +37,22 @@ public class UserService {
 //    @Autowired
 //    private AesEncrypter aesEncrypter;
 
+    public User findById(Integer id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Error"));
+
+        return user;
+    }
+
+    public UserDTO findByUsername(String username) {
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new RuntimeException("No hay");
+        }
+
+        return modelMapper.map(user, UserDTO.class);
+
+    }
+
     @Transactional
     public JwtResponseDTO loginUser(LoginRequest authRequestDto) {
         User user = userRepository.findByUsername(authRequestDto.getUsername());
@@ -103,4 +119,11 @@ public class UserService {
 //        SystemUser user = userRepository.findByDocumentData(documentData);
 //        return user != null;
 //    }
+
+    public UserDTO getLoggedUser(HttpServletRequest req) {
+        String token = jwtService.obtainTokenFromHeader(req);
+        String username = jwtService.extractUsername(token);
+
+        return this.findByUsername(username);
+    }
 }
