@@ -15,8 +15,8 @@ services:
       timeout: 40s
       retries: 10
     volumes:
-          - ./db_data:/var/lib/mysql
-#          - ./db:/docker-entrypoint-initdb.d
+      - ./db_data:/var/lib/mysql
+      - ./db:/docker-entrypoint-initdb.d
   phpmyadmin:
     depends_on:
       - db
