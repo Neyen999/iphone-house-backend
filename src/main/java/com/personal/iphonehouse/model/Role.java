@@ -12,10 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "roles")
-public class Role {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+public class Role extends EntityBase<Integer> {
     @Column(columnDefinition = "VARCHAR(50)")
     private String name;
 }
