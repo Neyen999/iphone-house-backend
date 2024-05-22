@@ -1,4 +1,4 @@
-package com.personal.iphonehouse.model;
+package com.personal.iphonehouse.models;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

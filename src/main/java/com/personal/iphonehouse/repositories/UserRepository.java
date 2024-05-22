@@ -1,6 +1,6 @@
-package com.personal.iphonehouse.repositorie;
+package com.personal.iphonehouse.repositories;
 
-import com.personal.iphonehouse.model.User;
+import com.personal.iphonehouse.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

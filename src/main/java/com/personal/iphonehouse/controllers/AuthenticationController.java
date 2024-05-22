@@ -1,17 +1,17 @@
-package com.personal.iphonehouse.controller;
+package com.personal.iphonehouse.controllers;
 
-import com.personal.iphonehouse.dto.JwtResponseDTO;
-import com.personal.iphonehouse.dto.LoginRequest;
-import com.personal.iphonehouse.dto.UserDTO;
-import com.personal.iphonehouse.service.JwtService;
-import com.personal.iphonehouse.service.UserService;
+import com.personal.iphonehouse.dtos.JwtResponseDTO;
+import com.personal.iphonehouse.dtos.LoginRequest;
+import com.personal.iphonehouse.dtos.UserDTO;
+import com.personal.iphonehouse.services.JwtService;
+import com.personal.iphonehouse.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/api/v${api.version}")
-@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT})
+@RequestMapping(value = "/api/v${api.version}/auth")
+//@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT})
 public class AuthenticationController {
     @Autowired
     private UserService userService;
@@ -23,22 +23,22 @@ public class AuthenticationController {
 //        return userService.getLoggedUser(req);
 //    }
 
-    @PostMapping("/auth/login")
+    @PostMapping("/login")
     public JwtResponseDTO login(@RequestBody LoginRequest authRequestDto) {
         return userService.loginUser(authRequestDto);
     }
 
-    @PostMapping("/auth/register")
+    @PostMapping("/register")
     public UserDTO registerSuperadmin(@RequestBody LoginRequest request) {
         return userService.registerUser(request);
     }
 
-    @PostMapping("/auth/validateJwt")
+    @PostMapping("/validateJwt")
     public ResponseEntity<Boolean> validateToken(@RequestBody JwtResponseDTO tokenRequest) {
         return ResponseEntity.ok(jwtService.validateToken(tokenRequest.getToken()));
     }
 
-    @PostMapping("/auth/refreshJwt")
+    @PostMapping("/refreshJwt")
     public ResponseEntity<JwtResponseDTO> refreshJwt(@RequestBody JwtResponseDTO tokenRequest) {
         return ResponseEntity.ok(jwtService.refreshJwt(tokenRequest.getToken()));
     }

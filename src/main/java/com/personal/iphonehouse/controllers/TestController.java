@@ -1,4 +1,4 @@
-package com.personal.iphonehouse.controller;
+package com.personal.iphonehouse.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

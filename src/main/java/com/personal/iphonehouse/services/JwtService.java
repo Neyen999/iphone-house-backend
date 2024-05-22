@@ -1,6 +1,6 @@
-package com.personal.iphonehouse.service;
+package com.personal.iphonehouse.services;
 
-import com.personal.iphonehouse.dto.JwtResponseDTO;
+import com.personal.iphonehouse.dtos.JwtResponseDTO;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

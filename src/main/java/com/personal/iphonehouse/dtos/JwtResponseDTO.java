@@ -1,4 +1,4 @@
-package com.personal.iphonehouse.dto;
+package com.personal.iphonehouse.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

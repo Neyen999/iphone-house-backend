@@ -1,12 +1,12 @@
-package com.personal.iphonehouse.service;
+package com.personal.iphonehouse.services;
 
-import com.personal.iphonehouse.dto.JwtResponseDTO;
-import com.personal.iphonehouse.dto.LoginRequest;
-import com.personal.iphonehouse.dto.UserDTO;
-import com.personal.iphonehouse.model.Role;
-import com.personal.iphonehouse.model.User;
-import com.personal.iphonehouse.repositorie.RoleRepository;
-import com.personal.iphonehouse.repositorie.UserRepository;
+import com.personal.iphonehouse.dtos.JwtResponseDTO;
+import com.personal.iphonehouse.dtos.LoginRequest;
+import com.personal.iphonehouse.dtos.UserDTO;
+import com.personal.iphonehouse.models.Role;
+import com.personal.iphonehouse.models.User;
+import com.personal.iphonehouse.repositories.RoleRepository;
+import com.personal.iphonehouse.repositories.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {

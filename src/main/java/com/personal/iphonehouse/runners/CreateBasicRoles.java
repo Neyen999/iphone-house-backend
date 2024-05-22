@@ -1,8 +1,8 @@
-package com.personal.iphonehouse.runner;
+package com.personal.iphonehouse.runners;
 
 import com.personal.iphonehouse.enums.RolesEnum;
-import com.personal.iphonehouse.model.Role;
-import com.personal.iphonehouse.repositorie.RoleRepository;
+import com.personal.iphonehouse.models.Role;
+import com.personal.iphonehouse.repositories.RoleRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;

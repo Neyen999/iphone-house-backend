@@ -1,4 +1,4 @@
-package com.personal.iphonehouse.dto;
+package com.personal.iphonehouse.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginRequest {
-    private String username;
-    private String password;
+public class RoleDTO {
+    private Integer id;
+    private String name;
 }
