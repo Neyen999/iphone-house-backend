@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer> {
     boolean existsByNameIgnoreCase(String name);
-    List<Product> findAllAndIsDeleteFalse();
-    @Query("SELECT pr FROM Product WHERE pr.category.name = :name")
-    List<Product> findByDeletedFalseAndCategoryName(@Param("name") String name);
+    List<Product> findByIsDeleteFalse();
+    @Query("SELECT pr FROM Product pr WHERE pr.category.name = :name AND pr.isDelete = false")
+    List<Product> findByIsDeleteFalseAndCategoryName(@Param("name") String name);
 }

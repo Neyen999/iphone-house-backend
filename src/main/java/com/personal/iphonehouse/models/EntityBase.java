@@ -1,5 +1,6 @@
 package com.personal.iphonehouse.models;
 
+import com.personal.iphonehouse.utils.DateUtil;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,4 +22,9 @@ public abstract class EntityBase<T> {
     private Date dateCreated;
     @LastModifiedDate
     private Date dateUpdated;
+
+    @PrePersist
+    void initializeDate() {
+        dateCreated = new DateUtil().utilDateNow();
+    }
 }

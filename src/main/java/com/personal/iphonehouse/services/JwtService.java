@@ -1,6 +1,7 @@
 package com.personal.iphonehouse.services;
 
 import com.personal.iphonehouse.dtos.JwtResponseDTO;
+import com.personal.iphonehouse.utils.DateUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -51,7 +52,7 @@ public class JwtService {
     }
 
     private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        return extractExpiration(token).before(new DateUtil().utilDateNow());
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {

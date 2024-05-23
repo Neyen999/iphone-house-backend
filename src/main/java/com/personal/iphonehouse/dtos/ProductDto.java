@@ -14,4 +14,5 @@ public class ProductDto {
     private String name;
     private CategoryDto category;
     private int price;
+    private StockDto stock;
 }
