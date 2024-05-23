@@ -14,7 +14,8 @@ import lombok.Setter;
 @Table(name = "products")
 public class Product extends EntityBase<Integer> {
     private String name;
-//    private Category category;
+    @ManyToOne
+    private Category category;
     private int price;
 //    private File file;
 }
