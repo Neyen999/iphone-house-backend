@@ -23,7 +23,8 @@ public class StockDto {
     private Integer registerReposition; // reposición, esto se agrega y quiza se le suma a alguno de los 3 anteriores?
     private Integer finalStock; // stock al final del día, la cantidad que habia menos las ventas
     private boolean tester;
-    private ProductDto product;
+//    private ProductDto product;
+    private ProductSimpleDto product;
 
     // Getter for currentStock
     public int getCurrentStock() {

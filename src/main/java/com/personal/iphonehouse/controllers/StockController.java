@@ -5,6 +5,7 @@ import com.personal.iphonehouse.services.StockGenerationService;
 import com.personal.iphonehouse.services.StockService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,13 +26,11 @@ public class StockController {
     }
 
     @GetMapping("/stocks")
-    public ResponseEntity<Page<StockDto>> getAllStocks(@RequestParam("productId") Integer productId,
-                                                       @RequestParam("categoryId") Integer categoryId,
-                                                       @RequestParam("startDate") Date startDate,
-                                                       @RequestParam("endDate") Date endDate,
+    public ResponseEntity<Page<StockDto>> getAllStocks(@RequestParam(value = "search", defaultValue = "") String search,
+                                                       @RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date desiredDate,
                                                        @RequestParam(value = "page", defaultValue = "0") int page,
                                                        @RequestParam(value = "size", defaultValue = "10") int size) {
-        return ResponseEntity.ok(stockService.getAllStockByIdAnd(productId, categoryId, startDate, endDate, page, size));
+        return ResponseEntity.ok(stockService.getAllStockByIdAnd(search, desiredDate, page, size));
     }
 
     @PostMapping("/stockGeneration")

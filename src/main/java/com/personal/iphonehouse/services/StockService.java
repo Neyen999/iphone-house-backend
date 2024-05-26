@@ -12,11 +12,14 @@ import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -61,34 +64,33 @@ public class StockService {
         return stockRepository.findByDateCreatedAndIsDeleteFalse(date);
     }
 
-    public Page<StockDto> getAllStockByIdAnd(Integer productId,
-                                             Integer categoryId,
-                                             Date startDate,
-                                             Date endDate,
+    public Page<StockDto> getAllStockByIdAnd(String search,
+                                             Date desiredDate,
                                              int page,
                                              int size) {
         Pageable pageable = PageRequest.of(page, size);
 
-        Product product = null;
-//        Category category = null;
-
-        if (productId != null)
-            product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Error"));
-
-//        if (categoryId != null)
-//            category = categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Error"));
-        if (product != null && startDate != null && endDate != null) {
-            return stockRepository.findAllByProductAndIsDeleteFalseAndDateCreatedBetween(product, startDate, endDate, pageable)
-                    .map(this::convertToDto);
-        } else if (categoryId != null && startDate != null && endDate != null) {
-            return stockRepository.findAllByProductCategoryIdAndIsDeleteFalseAndDateCreatedBetween(categoryId, startDate, endDate, pageable)
-                    .map(this::convertToDto);
-        } else if (categoryId != null) {
-            return stockRepository.findAllByProductCategoryIdAndIsDeleteFalse(categoryId, pageable)
-                    .map(this::convertToDto);
-        } else {
-            return Page.empty(pageable);
+        if (desiredDate == null) {
+            desiredDate = new Date(); // Usa la fecha actual si no se proporciona una
         }
+
+        LocalDate localDesiredDate = desiredDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate startDate = localDesiredDate.minusDays(1);
+        LocalDate endDate = localDesiredDate.plusDays(1);
+
+        Date start = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date end = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        Page<Stock> stockPage = stockRepository.searchStock(search,
+                start,
+                end,
+                pageable);
+
+        List<StockDto> stockDtos = stockPage.getContent().stream()
+                .map(this::convertToDto) // Implementa esta función para convertir a DTO
+                .toList();
+
+        return new PageImpl<>(stockDtos, pageable, stockPage.getTotalElements());
     }
 
     @Transactional

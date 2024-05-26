@@ -1,6 +1,7 @@
 package com.personal.iphonehouse.services;
 
 import com.personal.iphonehouse.dtos.ProductDto;
+import com.personal.iphonehouse.dtos.ProductSimpleDto;
 import com.personal.iphonehouse.dtos.StockDto;
 import com.personal.iphonehouse.models.Product;
 import com.personal.iphonehouse.models.Stock;
@@ -61,7 +62,7 @@ public class StockGenerationService {
                     null,
                     null,
                     tester,
-                    modelMapper.map(product, ProductDto.class));
+                    modelMapper.map(product, ProductSimpleDto.class));
 
             stockService.saveStock(brandNewStock);
         }

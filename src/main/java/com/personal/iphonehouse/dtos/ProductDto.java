@@ -13,6 +13,10 @@ public class ProductDto {
     private Integer id;
     private String name;
     private CategoryDto category;
-    private int price;
-    private StockDto stock;
+    private int idealStock;
+    private int initialStock; // el general, preguntar si es la suma de todos o tienen separado
+    private int initialCounterStock; // el de mostrador
+    private int initialRegisterStock; // el de caja
+    private boolean tester;
+//    private StockDto stock;
 }

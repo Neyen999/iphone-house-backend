@@ -2,6 +2,7 @@ package com.personal.iphonehouse.services;
 
 import com.personal.iphonehouse.dtos.CategoryDto;
 import com.personal.iphonehouse.dtos.ProductDto;
+import com.personal.iphonehouse.dtos.ProductSimpleDto;
 import com.personal.iphonehouse.dtos.StockDto;
 import com.personal.iphonehouse.models.Category;
 import com.personal.iphonehouse.models.Product;
@@ -37,9 +38,15 @@ public class ProductService {
 
         ProductDto response = modelMapper.map(product, ProductDto.class);
         // ahora guardo el stock inicial
-        StockDto stockRequest = request.getStock();
-        stockRequest.setProduct(response);
-        stockService.saveStock(request.getStock());
+        StockDto stockRequest = new StockDto();
+        stockRequest.setIdealStock(request.getIdealStock());
+        stockRequest.setInitialStock(request.getInitialStock());
+        stockRequest.setInitialRegisterStock(request.getInitialRegisterStock());
+        stockRequest.setInitialCounterStock(request.getInitialCounterStock());
+        stockRequest.setProduct(new ProductSimpleDto(product.getId(), product.getName()));
+        stockRequest.setTester(request.isTester());
+
+        stockService.saveStock(stockRequest);
 
         return response;
     }
@@ -65,7 +72,7 @@ public class ProductService {
         return products.stream()
                 .map(product -> new ProductDto(product.getId(),
                         product.getName(),
-                        modelMapper.map(product.getCategory(), CategoryDto.class), product.getPrice(), null))
+                        modelMapper.map(product.getCategory(), CategoryDto.class),  0, 0, 0, 0, product.getName().contains("(TESTER)")))
                 .collect(Collectors.toList());
     }
 
@@ -76,7 +83,7 @@ public class ProductService {
         // lo desarrollamos despues
         Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Error"));
         product.setName(request.getName());
-        product.setPrice(request.getPrice());
+//        product.setPrice(request.getPrice());
 
         if (!request.getCategory().getId().equals(product.getCategory().getId())) {
             Category category = categoryRepository.findById(request.getCategory().getId()).orElseThrow(() -> new RuntimeException("Error"));
