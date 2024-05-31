@@ -21,9 +21,9 @@ import java.util.function.Function;
 @Service
 public class JwtService {
     public static final String SECRET = "958c4cc9eab74ebd6596777715a7896a3f9f2352c53fa4fd2a215f0fc022b7d0";
-//    public static final int EXPIRATION_TIME = 1000 * 60 * 60 * 12;
+    public static final int EXPIRATION_TIME = 1000 * 60 * 60 * 12;
     // TODO Poner el tiempo de vencimiento que va
-    public static final int EXPIRATION_TIME = 1000 * 60 * 60; // 1 hora
+//    public static final int EXPIRATION_TIME = 1000 * 60 * 60; // 1 hora
 //    public static final int EXPIRATION_TIME = 1000 * 60; // 1 min
 
     @Autowired

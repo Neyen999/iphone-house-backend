@@ -1,0 +1,23 @@
+package com.personal.iphonehouse.models;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "product_sales")
+public class ProductSale extends EntityBase<Integer> {
+    @ManyToOne
+    private Product product;
+    private int registerQuantity;
+    private int counterQuantity;
+}

@@ -26,7 +26,7 @@ public class StockController {
     }
 
     @GetMapping("/stocks")
-    public ResponseEntity<Page<StockDto>> getAllStocks(@RequestParam(value = "search", defaultValue = "") String search,
+    public ResponseEntity<Page<StockDto>> getAllStocks(@RequestParam(value = "search", defaultValue = "", required = false) String search,
                                                        @RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date desiredDate,
                                                        @RequestParam(value = "page", defaultValue = "0") int page,
                                                        @RequestParam(value = "size", defaultValue = "10") int size) {

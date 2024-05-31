@@ -17,5 +17,6 @@ public class Product extends EntityBase<Integer> {
     @ManyToOne
     private Category category;
     private Integer price;
+    private boolean tester;
 //    private File file;
 }

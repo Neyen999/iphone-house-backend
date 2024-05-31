@@ -64,6 +64,16 @@ public class StockService {
         return stockRepository.findByDateCreatedAndIsDeleteFalse(date);
     }
 
+    public StockDto getStocksByDateTodayAndProduct(Product product) {
+        LocalDate today = LocalDate.now(ZoneId.of("America/Argentina/Buenos_Aires"));
+        Date now = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        Stock stock = stockRepository.findByDateCreatedAndProductAndIsDeleteFalse(now, product);
+
+
+        return stock != null ? convertToDto(stock) : null;
+    }
+
     public Page<StockDto> getAllStockByIdAnd(String search,
                                              Date desiredDate,
                                              int page,
@@ -102,16 +112,12 @@ public class StockService {
         stock.setCounterReposition(request.getCounterReposition());
         stock.setRegisterReposition(request.getRegisterReposition());
         stock.setDateUpdated(new DateUtil().utilDateNow());
+        stock.setRegisterSales(request.getRegisterSales());
+        stock.setCounterSales(request.getCounterSales());
 
         if (request.getCurrentCounterStock() + request.getCurrentRegisterStock() != request.getCurrentStock()) {
             throw new RuntimeException("El stock de caja y el de mostrador no coinciden con el general");
         }
-
-        // TODO: Revisar esta edición, los valores iniciales no se modifican para eso estan las cuentas
-        // los valores iniciales no los toco,
-//        stock.(request.getGeneralStock());
-//        stock.setInitialCounterStock(request.getCurrentCounterStock());
-//        stock.setInitialRegisterStock(request.getCurrentRegisterStock());
 
         stockRepository.save(stock);
 

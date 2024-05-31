@@ -21,8 +21,8 @@ public class Stock extends EntityBase<Integer> {
     private int initialRegisterStock; // el de caja
     private int registerSales;
     private int counterSales;
-    private Integer counterReposition; // reposición, esto se agrega y quiza se le suma a alguno de los 3 anteriores?
-    private Integer registerReposition; // reposición, esto se agrega y quiza se le suma a alguno de los 3 anteriores?
+    private int counterReposition; // reposición, esto se agrega y quiza se le suma a alguno de los 3 anteriores?
+    private int registerReposition; // reposición, esto se agrega y quiza se le suma a alguno de los 3 anteriores?
     private Integer finalStock; // stock al final del día, la cantidad que habia menos las ventas
     private boolean tester;
     @ManyToOne
@@ -38,19 +38,19 @@ public class Stock extends EntityBase<Integer> {
     // Getter for currentStock
     public int getCurrentStock() {
         int totalSales = registerSales + counterSales;
-        int totalRepositions = (counterReposition != null ? counterReposition : 0) + (registerReposition != null ? registerReposition : 0);
+        int totalRepositions = counterReposition + registerReposition;
         return initialStock - totalSales + totalRepositions;
     }
 
     // Getter for currentRegisterStock
     public int getCurrentRegisterStock() {
-        int registerRepositions = this.registerReposition != null ? this.registerReposition : 0;
+        int registerRepositions = this.registerReposition;
         return initialRegisterStock - registerSales + registerRepositions;
     }
 
     // Getter for currentCounterStock
     public int getCurrentCounterStock() {
-        int counterRepositions = this.counterReposition != null ? this.counterReposition : 0;
+        int counterRepositions = this.counterReposition;
         return initialCounterStock - counterSales + counterRepositions;
     }
 }

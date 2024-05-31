@@ -6,6 +6,7 @@ import com.personal.iphonehouse.dtos.ProductSimpleDto;
 import com.personal.iphonehouse.dtos.StockDto;
 import com.personal.iphonehouse.models.Category;
 import com.personal.iphonehouse.models.Product;
+import com.personal.iphonehouse.models.Stock;
 import com.personal.iphonehouse.repositories.CategoryRepository;
 import com.personal.iphonehouse.repositories.ProductRepository;
 import com.personal.iphonehouse.utils.DateUtil;
@@ -14,6 +15,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +31,8 @@ public class ProductService {
     private ModelMapper modelMapper;
     @Autowired
     private StockService stockService;
+    @Autowired
+    private SaleService saleService;
 
     @Transactional
     public ProductDto saveProduct(ProductDto request) {
@@ -43,7 +49,7 @@ public class ProductService {
         stockRequest.setInitialStock(request.getInitialStock());
         stockRequest.setInitialRegisterStock(request.getInitialRegisterStock());
         stockRequest.setInitialCounterStock(request.getInitialCounterStock());
-        stockRequest.setProduct(new ProductSimpleDto(product.getId(), product.getName()));
+        stockRequest.setProduct(new ProductSimpleDto(product.getId(), product.getName(), modelMapper.map(product.getCategory(), CategoryDto.class)));
         stockRequest.setTester(request.isTester());
 
         stockService.saveStock(stockRequest);
@@ -57,22 +63,14 @@ public class ProductService {
         return modelMapper.map(product, ProductDto.class);
     }
 
-    public List<ProductDto> getAllProducts(String category) {
-        List<Product> products;
-
-        if (category == null || category.isEmpty()) {
-            products = productRepository.findByIsDeleteFalse();
-        } else {
-            products = productRepository.findByIsDeleteFalseAndCategoryName(category);
-        }
+    public List<ProductDto> getAllProducts(String search) {
+        List<Product> products = productRepository.findBySearchAndIsDeleteFalseAndDateBetween(search);
 
         // todo:
         //  el frontend solo en el guardar te da la opción de cargar una cantidad de productos que impactan en el stock
 
         return products.stream()
-                .map(product -> new ProductDto(product.getId(),
-                        product.getName(),
-                        modelMapper.map(product.getCategory(), CategoryDto.class),  0, 0, 0, 0, product.getName().contains("(TESTER)")))
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
@@ -106,5 +104,21 @@ public class ProductService {
         product.setDelete(true);
 
         productRepository.save(product);
+    }
+
+    public ProductDto convertToDto(Product product) {
+        ProductDto productDto = modelMapper.map(product, ProductDto.class);
+        productDto.setTester(product.getName().contains("(TESTER)"));
+
+        // la cantidad disponible la saco del stock
+        StockDto stock = stockService.getStocksByDateTodayAndProduct(product);
+        int totalSold = saleService.getTotalSalesByProduct(product);
+
+        if (stock != null)
+            productDto.setAvaiableQuantity(stock.getCurrentStock());
+
+        productDto.setTotalSold(totalSold);
+
+        return productDto;
     }
 }

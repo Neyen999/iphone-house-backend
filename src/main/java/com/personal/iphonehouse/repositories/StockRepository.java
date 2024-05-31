@@ -5,7 +5,6 @@ import com.personal.iphonehouse.models.Stock;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -35,7 +34,7 @@ public interface StockRepository extends JpaRepository<Stock, Integer> {
                             @Param("startDate") Date startDate,
                             @Param("endDate") Date endDate,
                             Pageable pageable);
-
+    Stock findByDateCreatedAndProductAndIsDeleteFalse(Date date, Product product);
     List<Stock> findByProduct(Product product);
     boolean existsByProductIdAndDateCreatedAndIsDeleteFalse(Integer productId, Date dateCreated);
     List<Stock> findByDateCreatedAndIsDeleteFalse(Date date);

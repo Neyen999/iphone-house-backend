@@ -58,8 +58,8 @@ public class StockGenerationService {
                     newInitialRegisterStock,
                     0,
                     0,
-                    null,
-                    null,
+                    0,
+                    0,
                     null,
                     tester,
                     modelMapper.map(product, ProductSimpleDto.class));

@@ -3,9 +3,11 @@ package com.personal.iphonehouse.controllers;
 import com.personal.iphonehouse.dtos.ProductDto;
 import com.personal.iphonehouse.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -18,8 +20,8 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProductById(id));
     }
     @GetMapping("/products")
-    public ResponseEntity<List<ProductDto>> getProducts(@RequestParam(value = "category", required = false) String category) {
-        return ResponseEntity.ok(productService.getAllProducts(category));
+    public ResponseEntity<List<ProductDto>> getProducts(@RequestParam(value = "search", defaultValue = "", required = false) String search) {
+        return ResponseEntity.ok(productService.getAllProducts(search));
     }
 
     @PostMapping("")
