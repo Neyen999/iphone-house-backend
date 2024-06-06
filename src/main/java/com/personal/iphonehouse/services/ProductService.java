@@ -57,6 +57,19 @@ public class ProductService {
         return response;
     }
 
+    public List<ProductDto> saveRegularAndTesterProduct(List<ProductDto> request) {
+        // solo deberia haber 2
+        if (request.size() > 2) {
+            throw new RuntimeException("Error");
+        }
+
+        return request
+                .stream()
+                .map(this::saveProduct)
+                .collect(Collectors.toList());
+
+    }
+
     public ProductDto getProductById(Integer id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Error"));
 
@@ -76,34 +89,53 @@ public class ProductService {
 
     @Transactional
     public ProductDto editProduct(ProductDto request, Integer id) {
-        // todo:
-        //  solo editamos precio, imagen, descripción etc, el frontend no tiene que poder dar la opción de agregar
-        // lo desarrollamos despues
         Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Error"));
-        product.setName(request.getName());
-//        product.setPrice(request.getPrice());
+        Product testerProduct = null;
+        Category category = null;
+
+        if (productRepository.existsByNameIgnoreCase(request.getName())) {
+            throw new RuntimeException("Nombre en uso");
+        }
 
         if (!request.getCategory().getId().equals(product.getCategory().getId())) {
-            Category category = categoryRepository.findById(request.getCategory().getId()).orElseThrow(() -> new RuntimeException("Error"));
+            category = categoryRepository.findById(request.getCategory().getId()).orElseThrow(() -> new RuntimeException("Error"));
             product.setCategory(category);
         }
 
+        product.setName(request.getName());
         product.setDateUpdated(new DateUtil().utilDateNow());
 
         productRepository.save(product);
+
+        if (productRepository.existsByNameIgnoreCase(product.getName() + "(TESTER)")) {
+            testerProduct = productRepository
+                    .findByNameEqualsIgnoreCase(product.getName() + "(TESTER)").orElseThrow(() -> new RuntimeException("Error"));
+        }
+
+        if (testerProduct != null) {
+            testerProduct.setName(request.getName());
+            testerProduct.setCategory(category);
+            testerProduct.setDateUpdated(new DateUtil().utilDateNow());
+            productRepository.save(testerProduct);
+        }
 
         return modelMapper.map(product, ProductDto.class);
     }
 
     @Transactional
-    public void deleteProduct(Integer id) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Error"));
+    public void deleteProduct(String name) {
+        Product product = productRepository.findByNameEqualsIgnoreCase(name).orElseThrow(() -> new RuntimeException("Error"));
+        Product productTester = productRepository.findByNameEqualsIgnoreCase(name + "(TESTER)").orElseThrow(() -> new RuntimeException("Error"));
+
 
         stockService.deleteStocksByProduct(stockService.stocksByProduct(product));
+        stockService.deleteStocksByProduct(stockService.stocksByProduct(productTester));
         // marco como eliminados todos los stocks que tengan ese id de product
         product.setDelete(true);
+        productTester.setDelete(true);
 
         productRepository.save(product);
+        productRepository.save(productTester);
     }
 
     public ProductDto convertToDto(Product product) {

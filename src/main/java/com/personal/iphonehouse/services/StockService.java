@@ -41,7 +41,7 @@ public class StockService {
         }
 
         // stock general = stock de caja + stock de mostrador
-        if (request.getInitialCounterStock() + request.getInitialRegisterStock() != request.getCurrentStock()) {
+        if (!request.isTester() && (request.getInitialCounterStock() + request.getInitialRegisterStock() != request.getCurrentStock())) {
             throw new RuntimeException("El stock de caja y el de mostrador no coinciden con el general");
         }
 

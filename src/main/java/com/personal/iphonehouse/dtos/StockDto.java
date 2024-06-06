@@ -21,6 +21,8 @@ public class StockDto {
     private int counterSales;
     private int counterReposition; // reposición, esto se agrega y quiza se le suma a alguno de los 3 anteriores?
     private int registerReposition; // reposición, esto se agrega y quiza se le suma a alguno de los 3 anteriores?
+    private int registerTransfersToTester; // Prestaciones de caja al stock de tester
+    private int counterTransfersToTester; // Prestaciones de mostrador al stock de tester
     private Integer finalStock; // stock al final del día, la cantidad que habia menos las ventas
     private boolean tester;
 //    private ProductDto product;
@@ -30,18 +32,20 @@ public class StockDto {
     public int getCurrentStock() {
         int totalSales = registerSales + counterSales;
         int totalRepositions = counterReposition + registerReposition;
-        return initialStock - totalSales + totalRepositions;
+        int totalTransfersToTester = registerTransfersToTester + counterTransfersToTester;
+
+        return initialStock - totalSales + totalRepositions - totalTransfersToTester;
     }
 
     // Getter for currentRegisterStock
     public int getCurrentRegisterStock() {
         int registerRepositions = this.registerReposition;
-        return initialRegisterStock - registerSales + registerRepositions;
+        return initialRegisterStock - registerSales + registerRepositions - registerTransfersToTester;
     }
 
     // Getter for currentCounterStock
     public int getCurrentCounterStock() {
         int counterRepositions = this.counterReposition;
-        return initialCounterStock - counterSales + counterRepositions;
+        return initialCounterStock - counterSales + counterRepositions - counterTransfersToTester;
     }
 }

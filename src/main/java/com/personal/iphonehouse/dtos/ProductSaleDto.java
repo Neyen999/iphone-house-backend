@@ -12,6 +12,7 @@ import lombok.Setter;
 public class ProductSaleDto {
     private Integer id;
     private ProductSimpleDto product;
+    private ProductSimpleDto testerProduct;
     private int totalQuantity;
     private int registerQuantity;
     private int counterQuantity;

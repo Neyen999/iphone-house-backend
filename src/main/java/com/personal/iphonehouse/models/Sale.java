@@ -18,5 +18,10 @@ public class Sale extends EntityBase<Integer> {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "sale_id")
     private List<ProductSale> productSales;
-    private String name;
+    private String userName;
+    private int userPhoneNumber;
+    private int userPayment;
+    private int totalPrice;
+    private int totalChange;
+    private boolean testerSale;
 }

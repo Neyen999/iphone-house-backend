@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,6 +17,9 @@ import lombok.Setter;
 public class ProductSale extends EntityBase<Integer> {
     @ManyToOne
     private Product product;
+    // Producto de donde se ha sustraído el stock, en caso de que product sea tester
+    @ManyToOne(optional = true)
+    private Product testerProduct;
     private int registerQuantity;
     private int counterQuantity;
 }

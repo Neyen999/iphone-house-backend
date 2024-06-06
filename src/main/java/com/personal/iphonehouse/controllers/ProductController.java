@@ -29,13 +29,18 @@ public class ProductController {
         return ResponseEntity.ok(productService.saveProduct(request));
     }
 
+    @PostMapping("/testerBulk")
+    public ResponseEntity<List<ProductDto>> saveProductAndTesterProduct(@RequestBody List<ProductDto> request) {
+        return ResponseEntity.ok(productService.saveRegularAndTesterProduct(request));
+    }
+
     @PutMapping("/products/{id}")
     public ResponseEntity<ProductDto> editProduct(@RequestBody ProductDto request, @PathVariable Integer id) {
         return ResponseEntity.ok(productService.editProduct(request, id));
     }
 
-    @DeleteMapping("/products/{id}")
-    public void deleteProduct(@PathVariable Integer id) {
-        productService.deleteProduct(id);
+    @DeleteMapping("/products/{name}")
+    public void deleteProduct(@PathVariable String name) {
+        productService.deleteProduct(name);
     }
 }

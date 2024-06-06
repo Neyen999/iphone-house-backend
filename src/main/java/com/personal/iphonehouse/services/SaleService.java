@@ -12,6 +12,10 @@ import com.personal.iphonehouse.utils.DateUtil;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -38,22 +42,50 @@ public class SaleService {
         // 1- Busco al stock del día de hoy según por product que quiera vender
         // 2- Según la cantidad de registerQuantity o counterQuantity, tengo que sumarle al stock
         // en registerSales o counterSales y guardar.
-        LocalDate today = LocalDate.now(ZoneId.of("America/Argentina/Buenos_Aires"));
-//        Date now = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
         for (ProductSale productSale : sale.getProductSales()) {
             StockDto stock = stockService.getStocksByDateTodayAndProduct(productSale.getProduct());
-            if (productSale.getCounterQuantity() > 0) {
-                int prevSaleQuantityPlusNew = stock.getCounterSales() + productSale.getCounterQuantity();
-                stock.setCounterSales(prevSaleQuantityPlusNew);
+            // getProduct nunca va a ser tester, siempre va a ser un producto normal.
+            if (productSale.getTesterProduct() == null) {
+
+                if (productSale.getCounterQuantity() > 0) {
+                    int prevSaleQuantityPlusNew = stock.getCounterSales() + productSale.getCounterQuantity();
+                    stock.setCounterSales(prevSaleQuantityPlusNew);
+                }
+
+                if (productSale.getRegisterQuantity() > 0) {
+                    int prevSaleQuantityPlusNew = stock.getRegisterSales() + productSale.getRegisterQuantity();
+                    stock.setRegisterSales(prevSaleQuantityPlusNew);
+                }
+
+                stockService.editStock(stock, stock.getId());
+            } else {
+                StockDto testerStock = stockService.getStocksByDateTodayAndProduct(productSale.getTesterProduct());
+
+                if (productSale.getCounterQuantity() > 0) {
+                    // agrego la cantidad como reposicion para tester
+                    int prevCounterRepositionValuePlusNew = testerStock.getCounterReposition() + productSale.getCounterQuantity();
+                    testerStock.setCounterReposition(prevCounterRepositionValuePlusNew);
+
+                    // agrego las transferencias a tester
+                    int prevCounterTransferPlusNew = stock.getCounterTransfersToTester() + productSale.getCounterQuantity();
+                    stock.setCounterTransfersToTester(prevCounterTransferPlusNew);
+                }
+
+                if (productSale.getRegisterQuantity() > 0) {
+                    // agrego la cantidad como reposicion para tester
+                    int prevRegisterRepositionValuePlusNew = testerStock.getRegisterReposition() + productSale.getRegisterQuantity();
+                    testerStock.setRegisterReposition(prevRegisterRepositionValuePlusNew);
+
+                    // agrego las transferencias a tester
+                    int prevRegisterTransferPlusNew = stock.getRegisterTransfersToTester() + productSale.getRegisterQuantity();
+                    stock.setRegisterTransfersToTester(prevRegisterTransferPlusNew);
+                }
+
+                stockService.editStock(stock, stock.getId());
+                stockService.editStock(testerStock, testerStock.getId());
             }
 
-            if (productSale.getRegisterQuantity() > 0) {
-                int prevSaleQuantityPlusNew = stock.getRegisterSales() + productSale.getRegisterQuantity();
-                stock.setRegisterSales(prevSaleQuantityPlusNew);
-            }
-
-            stockService.editStock(stock, stock.getId());
         }
 
         saleRepository.save(sale);
@@ -61,27 +93,46 @@ public class SaleService {
         return this.convertToDto(sale);
     }
 
-    public List<SaleDto> getSales(String search, Date desiredDate) {
+//    public Page<SaleDto> getSales(String search, Date desiredDate, int page, int size) {
 //        Pageable pageable = PageRequest.of(page, size);
+//
+//        Page<Sale> salesPage;
+//        if (desiredDate == null) {
+//            // Si no se proporciona fecha, se buscarán todas las ventas ordenadas de más reciente a menos reciente
+////            salesPage = saleRepository.findSalesBySearchAndDateBetweenAndTesterSaleFalse(search, null, null, pageable);
+//            salesPage = saleRepository.findSalesBySearchAndDateBetweenAndTesterSaleFalse(search, null, pageable);
+//        } else {
+//            // Si se proporciona una fecha, se buscarán las ventas solo de esa fecha
+////            LocalDate localDesiredDate = desiredDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+////            LocalDate startDate = localDesiredDate.minusDays(1);
+////            LocalDate endDate = localDesiredDate.plusDays(1);
+//
+////            Date start = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+////            Date end = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+//
+//            salesPage = saleRepository.findSalesBySearchAndDateBetweenAndTesterSaleFalse(search, desiredDate, pageable);
+//        }
+//
+//        List<SaleDto> salesDtoList = salesPage.stream()
+//                .map(this::convertToDto)
+//                .collect(Collectors.toList());
+//
+//        return new PageImpl<>(salesDtoList, pageable, salesPage.getTotalElements());
+//    }
+    public Page<SaleDto> getSales(String search, Date startDate, Date endDate, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
 
-        if (desiredDate == null) {
-            desiredDate = new DateUtil().utilDateNow(); // Usa la fecha actual si no se proporciona una
-        }
+        Page<Sale> salesPage = saleRepository.findSalesBySearchAndDateBetweenAndTesterSaleFalse(search, startDate, endDate, pageable);
 
-        LocalDate localDesiredDate = desiredDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate startDate = localDesiredDate.minusDays(1);
-        LocalDate endDate = localDesiredDate.plusDays(1);
+        List<SaleDto> salesDtoList = salesPage.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
 
-        Date start = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        Date end = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-
-        List<Sale> salesPage = saleRepository.findSalesBySearchAndDateBetween(search,
-                start,
-                end);
-
-        return salesPage.stream()
-                .map(this::convertToDto).collect(Collectors.toList());
+        return new PageImpl<>(salesDtoList, pageable, salesPage.getTotalElements());
     }
+
+
+
 
     public int getTotalSalesByProduct(Product product) {
         List<ProductSale> productSales = productSaleRepository.findByProductAndIsDeleteFalse(product);

@@ -60,6 +60,8 @@ public class StockGenerationService {
                     0,
                     0,
                     0,
+                    stock.getRegisterTransfersToTester(),
+                    stock.getCounterTransfersToTester(),
                     null,
                     tester,
                     modelMapper.map(product, ProductSimpleDto.class));

@@ -20,7 +20,12 @@ public class CategoryController {
     }
 
     @PostMapping("")
-    public ResponseEntity<CategoryDto> saveCategory(@RequestParam(value = "name", required = true) String name) {
-        return ResponseEntity.ok(categoryService.saveCategory(name));
+    public ResponseEntity<CategoryDto> saveCategory(@RequestBody CategoryDto request) {
+        return ResponseEntity.ok(categoryService.saveCategory(request));
+    }
+
+    @PutMapping("/categories/{id}")
+    public ResponseEntity<CategoryDto> editCategory(@PathVariable Integer id, @RequestBody CategoryDto request) {
+        return ResponseEntity.ok(categoryService.editCategory(id, request));
     }
 }
