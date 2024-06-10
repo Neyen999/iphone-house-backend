@@ -17,8 +17,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,7 +51,7 @@ public class ProductService {
         stockRequest.setInitialStock(request.getInitialStock());
         stockRequest.setInitialRegisterStock(request.getInitialRegisterStock());
         stockRequest.setInitialCounterStock(request.getInitialCounterStock());
-        stockRequest.setProduct(new ProductSimpleDto(product.getId(), product.getName(), modelMapper.map(product.getCategory(), CategoryDto.class)));
+        stockRequest.setProduct(new ProductSimpleDto(product.getId(), product.getName(), modelMapper.map(product.getCategory(), CategoryDto.class), product.isTester()));
         stockRequest.setTester(request.isTester());
 
         stockService.saveStock(stockRequest);
@@ -123,19 +125,25 @@ public class ProductService {
     }
 
     @Transactional
-    public void deleteProduct(String name) {
+    public List<ProductDto> deleteProduct(String name) {
         Product product = productRepository.findByNameEqualsIgnoreCase(name).orElseThrow(() -> new RuntimeException("Error"));
-        Product productTester = productRepository.findByNameEqualsIgnoreCase(name + "(TESTER)").orElseThrow(() -> new RuntimeException("Error"));
-
+        Optional<Product> productTester = productRepository.findByNameEqualsIgnoreCase(name + " (TESTER)");
+        List<ProductDto> deletedProducts = new ArrayList<>();
 
         stockService.deleteStocksByProduct(stockService.stocksByProduct(product));
-        stockService.deleteStocksByProduct(stockService.stocksByProduct(productTester));
-        // marco como eliminados todos los stocks que tengan ese id de product
         product.setDelete(true);
-        productTester.setDelete(true);
-
+        deletedProducts.add(modelMapper.map(product, ProductDto.class));
         productRepository.save(product);
-        productRepository.save(productTester);
+
+        // marco como eliminados todos los stocks que tengan ese id de product
+        if (productTester.isPresent()) {
+            stockService.deleteStocksByProduct(stockService.stocksByProduct(productTester.get()));
+            productTester.get().setDelete(true);
+            deletedProducts.add(modelMapper.map(productTester.get(), ProductDto.class));
+            productRepository.save(productTester.get());
+        }
+
+        return deletedProducts;
     }
 
     public ProductDto convertToDto(Product product) {

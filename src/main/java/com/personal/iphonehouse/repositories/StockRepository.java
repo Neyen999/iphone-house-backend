@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface StockRepository extends JpaRepository<Stock, Integer> {
@@ -27,9 +28,7 @@ public interface StockRepository extends JpaRepository<Stock, Integer> {
             "CAST(s.registerSales AS string) LIKE CONCAT('%', :search, '%') OR " +
             "CAST(s.counterSales AS string) LIKE CONCAT('%', :search, '%') OR " +
             "CAST(s.finalStock AS string) LIKE CONCAT('%', :search, '%')) " +
-//            "AND YEAR(s.dateCreated) = YEAR(:desiredDate) " +
-//            "AND MONTH(s.dateCreated) = MONTH(:desiredDate) " +
-            "AND s.dateCreated > :startDate AND s.dateCreated < :endDate")
+            "AND s.dateCreated > :startDate AND s.dateCreated < :endDate "  + "AND s.isDelete = false")
     Page<Stock> searchStock(@Param("search") String search,
                             @Param("startDate") Date startDate,
                             @Param("endDate") Date endDate,
@@ -37,5 +36,8 @@ public interface StockRepository extends JpaRepository<Stock, Integer> {
     Stock findByDateCreatedAndProductAndIsDeleteFalse(Date date, Product product);
     List<Stock> findByProduct(Product product);
     boolean existsByProductIdAndDateCreatedAndIsDeleteFalse(Integer productId, Date dateCreated);
-    List<Stock> findByDateCreatedAndIsDeleteFalse(Date date);
+    @Query("SELECT s FROM Stock s WHERE s.dateCreated = :date AND s.isDelete = false")
+    List<Stock> findByDateCreatedAndIsDeleteFalse(@Param("date") Date date);
+
+    Optional<Stock> findTopByIsDeleteFalseOrderByDateCreatedDesc();
 }

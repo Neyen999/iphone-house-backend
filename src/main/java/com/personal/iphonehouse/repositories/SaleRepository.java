@@ -45,7 +45,7 @@ public interface SaleRepository extends JpaRepository<Sale, Integer> {
             "OR (:startDate IS NULL AND :endDate IS NOT NULL AND s.dateCreated = :endDate) " +
             "OR (:startDate IS NOT NULL AND :endDate IS NOT NULL AND s.dateCreated BETWEEN :startDate AND :endDate) " +
             ") " +
-            "AND s.testerSale = false " +
+            "AND s.testerSale = false AND s.isDelete = false " +
             "ORDER BY s.dateCreated DESC")
     Page<Sale> findSalesBySearchAndDateBetweenAndTesterSaleFalse(@Param("search") String search,
                                                                  @Param("startDate") Date startDate,

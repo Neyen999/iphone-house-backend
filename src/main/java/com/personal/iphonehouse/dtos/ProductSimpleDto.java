@@ -13,4 +13,5 @@ public class ProductSimpleDto {
     private Integer id;
     private String name;
     private CategoryDto category;
+    private boolean tester;
 }

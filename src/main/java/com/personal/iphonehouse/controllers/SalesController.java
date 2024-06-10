@@ -30,4 +30,9 @@ public class SalesController {
     public ResponseEntity<SaleDto> saveSale(@RequestBody SaleDto request) {
         return ResponseEntity.ok(saleService.saveSale(request));
     }
+
+    @DeleteMapping("/sales/{id}")
+    public ResponseEntity<SaleDto> deleteSale(@PathVariable Integer id) {
+        return ResponseEntity.ok(saleService.deleteSale(id));
+    }
 }

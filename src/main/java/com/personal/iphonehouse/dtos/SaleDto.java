@@ -19,7 +19,7 @@ public class SaleDto {
     private int totalProducts;
     private int totalSoldProducts;
     private String userName;
-    private int userPhoneNumber;
+    private String userPhoneNumber;
     private int userPayment;
     private int totalPrice;
     private int totalChange;

@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class StockService {
@@ -67,6 +68,8 @@ public class StockService {
     public StockDto getStocksByDateTodayAndProduct(Product product) {
         LocalDate today = LocalDate.now(ZoneId.of("America/Argentina/Buenos_Aires"));
         Date now = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+
 
         Stock stock = stockRepository.findByDateCreatedAndProductAndIsDeleteFalse(now, product);
 
@@ -122,6 +125,11 @@ public class StockService {
         stockRepository.save(stock);
 
         return modelMapper.map(stock, StockDto.class);
+    }
+
+    public Optional<Date> getLastStockDate() {
+        return stockRepository.findTopByIsDeleteFalseOrderByDateCreatedDesc()
+                .map(Stock::getDateCreated);
     }
 
     public List<Stock> stocksByProduct(Product product) {

@@ -1,6 +1,7 @@
 package com.personal.iphonehouse.controllers;
 
 import com.personal.iphonehouse.dtos.ProductDto;
+import com.personal.iphonehouse.models.Product;
 import com.personal.iphonehouse.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -40,7 +41,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/products/{name}")
-    public void deleteProduct(@PathVariable String name) {
-        productService.deleteProduct(name);
+    public ResponseEntity<List<ProductDto>> deleteProduct(@PathVariable String name) {
+        return ResponseEntity.ok(productService.deleteProduct(name));
     }
 }

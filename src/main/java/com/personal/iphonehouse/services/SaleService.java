@@ -6,6 +6,7 @@ import com.personal.iphonehouse.dtos.StockDto;
 import com.personal.iphonehouse.models.Product;
 import com.personal.iphonehouse.models.ProductSale;
 import com.personal.iphonehouse.models.Sale;
+import com.personal.iphonehouse.models.Stock;
 import com.personal.iphonehouse.repositories.ProductSaleRepository;
 import com.personal.iphonehouse.repositories.SaleRepository;
 import com.personal.iphonehouse.utils.DateUtil;
@@ -43,82 +44,13 @@ public class SaleService {
         // 2- Según la cantidad de registerQuantity o counterQuantity, tengo que sumarle al stock
         // en registerSales o counterSales y guardar.
 
-        for (ProductSale productSale : sale.getProductSales()) {
-            StockDto stock = stockService.getStocksByDateTodayAndProduct(productSale.getProduct());
-            // getProduct nunca va a ser tester, siempre va a ser un producto normal.
-            if (productSale.getTesterProduct() == null) {
-
-                if (productSale.getCounterQuantity() > 0) {
-                    int prevSaleQuantityPlusNew = stock.getCounterSales() + productSale.getCounterQuantity();
-                    stock.setCounterSales(prevSaleQuantityPlusNew);
-                }
-
-                if (productSale.getRegisterQuantity() > 0) {
-                    int prevSaleQuantityPlusNew = stock.getRegisterSales() + productSale.getRegisterQuantity();
-                    stock.setRegisterSales(prevSaleQuantityPlusNew);
-                }
-
-                stockService.editStock(stock, stock.getId());
-            } else {
-                StockDto testerStock = stockService.getStocksByDateTodayAndProduct(productSale.getTesterProduct());
-
-                if (productSale.getCounterQuantity() > 0) {
-                    // agrego la cantidad como reposicion para tester
-                    int prevCounterRepositionValuePlusNew = testerStock.getCounterReposition() + productSale.getCounterQuantity();
-                    testerStock.setCounterReposition(prevCounterRepositionValuePlusNew);
-
-                    // agrego las transferencias a tester
-                    int prevCounterTransferPlusNew = stock.getCounterTransfersToTester() + productSale.getCounterQuantity();
-                    stock.setCounterTransfersToTester(prevCounterTransferPlusNew);
-                }
-
-                if (productSale.getRegisterQuantity() > 0) {
-                    // agrego la cantidad como reposicion para tester
-                    int prevRegisterRepositionValuePlusNew = testerStock.getRegisterReposition() + productSale.getRegisterQuantity();
-                    testerStock.setRegisterReposition(prevRegisterRepositionValuePlusNew);
-
-                    // agrego las transferencias a tester
-                    int prevRegisterTransferPlusNew = stock.getRegisterTransfersToTester() + productSale.getRegisterQuantity();
-                    stock.setRegisterTransfersToTester(prevRegisterTransferPlusNew);
-                }
-
-                stockService.editStock(stock, stock.getId());
-                stockService.editStock(testerStock, testerStock.getId());
-            }
-
-        }
+        impactStockOnSaleOperation(sale, true);
 
         saleRepository.save(sale);
 
         return this.convertToDto(sale);
     }
 
-//    public Page<SaleDto> getSales(String search, Date desiredDate, int page, int size) {
-//        Pageable pageable = PageRequest.of(page, size);
-//
-//        Page<Sale> salesPage;
-//        if (desiredDate == null) {
-//            // Si no se proporciona fecha, se buscarán todas las ventas ordenadas de más reciente a menos reciente
-////            salesPage = saleRepository.findSalesBySearchAndDateBetweenAndTesterSaleFalse(search, null, null, pageable);
-//            salesPage = saleRepository.findSalesBySearchAndDateBetweenAndTesterSaleFalse(search, null, pageable);
-//        } else {
-//            // Si se proporciona una fecha, se buscarán las ventas solo de esa fecha
-////            LocalDate localDesiredDate = desiredDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-////            LocalDate startDate = localDesiredDate.minusDays(1);
-////            LocalDate endDate = localDesiredDate.plusDays(1);
-//
-////            Date start = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-////            Date end = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-//
-//            salesPage = saleRepository.findSalesBySearchAndDateBetweenAndTesterSaleFalse(search, desiredDate, pageable);
-//        }
-//
-//        List<SaleDto> salesDtoList = salesPage.stream()
-//                .map(this::convertToDto)
-//                .collect(Collectors.toList());
-//
-//        return new PageImpl<>(salesDtoList, pageable, salesPage.getTotalElements());
-//    }
     public Page<SaleDto> getSales(String search, Date startDate, Date endDate, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
@@ -131,13 +63,23 @@ public class SaleService {
         return new PageImpl<>(salesDtoList, pageable, salesPage.getTotalElements());
     }
 
-
-
-
     public int getTotalSalesByProduct(Product product) {
         List<ProductSale> productSales = productSaleRepository.findByProductAndIsDeleteFalse(product);
         return productSales.stream()
                 .mapToInt(productSale -> productSale.getRegisterQuantity() + productSale.getCounterQuantity()).sum();
+    }
+
+    @Transactional
+    public SaleDto deleteSale(Integer id) {
+        Sale sale = saleRepository.findById(id).orElseThrow(() -> new RuntimeException("Error"));
+
+        impactStockOnSaleOperation(sale, false);
+
+        sale.setDelete(true);
+        saleRepository.save(sale);
+
+        return modelMapper.map(sale, SaleDto.class);
+
     }
 
     public SaleDto convertToDto(Sale sale) {
@@ -153,4 +95,107 @@ public class SaleService {
         saleDto.setTotalSoldProducts(totalSoldProducts);
         return saleDto;
     }
+
+    public void impactStockOnSaleOperation(Sale sale, boolean isAddition) {
+        for (ProductSale productSale : sale.getProductSales()) {
+            StockDto stock = stockService.getStocksByDateTodayAndProduct(productSale.getProduct());
+            // getProduct nunca va a ser tester, siempre va a ser un producto normal.
+            if (productSale.getTesterProduct() == null) {
+                if (productSale.getCounterQuantity() > 0) {
+                    if (isAddition && productSale.getCounterQuantity() > stock.getCurrentCounterStock()) {
+                        throw new RuntimeException("Stock insuficiente");
+                    }
+
+
+                    int newCounterSales = isAddition
+                            ? stock.getCounterSales() + productSale.getCounterQuantity()
+                            : stock.getCounterSales() - productSale.getCounterQuantity();
+                    stock.setCounterSales(newCounterSales);
+                }
+
+                if (productSale.getRegisterQuantity() > 0) {
+                    if (isAddition && productSale.getRegisterQuantity() > stock.getCurrentRegisterStock()) {
+                        throw new RuntimeException("Stock insuficiente");
+                    }
+
+                    int newRegisterSales = isAddition
+                            ? stock.getRegisterSales() + productSale.getRegisterQuantity()
+                            : stock.getRegisterSales() - productSale.getRegisterQuantity();
+                    stock.setRegisterSales(newRegisterSales);
+                }
+
+                stockService.editStock(stock, stock.getId());
+            } else {
+                StockDto testerStock = stockService.getStocksByDateTodayAndProduct(productSale.getTesterProduct());
+
+                if (productSale.getCounterQuantity() > 0) {
+                    // Operaciones sobre testerStock y stock dependiendo del parámetro isAddition
+                    if (isAddition && productSale.getCounterQuantity() > stock.getCurrentCounterStock()) {
+                        throw new RuntimeException("Stock insuficiente");
+                    }
+
+                    int newCounterReposition = isAddition
+                            ? testerStock.getCounterReposition() + productSale.getCounterQuantity()
+                            : testerStock.getCounterReposition() - productSale.getCounterQuantity();
+                    testerStock.setCounterReposition(newCounterReposition);
+
+                    int newCounterTransfersToTester = isAddition
+                            ? stock.getCounterTransfersToTester() + productSale.getCounterQuantity()
+                            : stock.getCounterTransfersToTester() - productSale.getCounterQuantity();
+                    stock.setCounterTransfersToTester(newCounterTransfersToTester);
+                }
+
+                if (productSale.getRegisterQuantity() > 0) {
+                    // Operaciones sobre testerStock y stock dependiendo del parámetro isAddition
+                    if (isAddition && productSale.getRegisterQuantity() > stock.getCurrentRegisterStock()) {
+                        throw new RuntimeException("Stock insuficiente");
+                    }
+
+                    int newRegisterReposition = isAddition
+                            ? testerStock.getRegisterReposition() + productSale.getRegisterQuantity()
+                            : testerStock.getRegisterReposition() - productSale.getRegisterQuantity();
+                    testerStock.setRegisterReposition(newRegisterReposition);
+
+                    int newRegisterTransfersToTester = isAddition
+                            ? stock.getRegisterTransfersToTester() + productSale.getRegisterQuantity()
+                            : stock.getRegisterTransfersToTester() - productSale.getRegisterQuantity();
+                    stock.setRegisterTransfersToTester(newRegisterTransfersToTester);
+                }
+
+                stockService.editStock(stock, stock.getId());
+                stockService.editStock(testerStock, testerStock.getId());
+            }
+            if (!isAddition) {
+                productSale.setDelete(true);
+                productSaleRepository.save(productSale);
+            }
+        }
+    }
+
+//    public void addOrSubtractFromSotck(ProductSale productSale, Stock originStock, Stock testerStock, boolean isAddition) {
+//        if (productSale.getCounterQuantity() > 0) {
+//            if (isAddition && productSale.getCounterQuantity() > stock.getCurrentCounterStock()) {
+//                throw new RuntimeException("Stock insuficiente");
+//            }
+//
+//
+//            int newCounterSales = isAddition
+//                    ? stock.getCounterSales() + productSale.getCounterQuantity()
+//                    : stock.getCounterSales() - productSale.getCounterQuantity();
+//            stock.setCounterSales(newCounterSales);
+//        }
+//
+//        if (productSale.getRegisterQuantity() > 0) {
+//            if (isAddition && productSale.getRegisterQuantity() > stock.getCurrentRegisterStock()) {
+//                throw new RuntimeException("Stock insuficiente");
+//            }
+//
+//            int newRegisterSales = isAddition
+//                    ? stock.getRegisterSales() + productSale.getRegisterQuantity()
+//                    : stock.getRegisterSales() - productSale.getRegisterQuantity();
+//            stock.setRegisterSales(newRegisterSales);
+//        }
+//
+//    }
+
 }

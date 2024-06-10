@@ -19,7 +19,7 @@ public class Sale extends EntityBase<Integer> {
     @JoinColumn(name = "sale_id")
     private List<ProductSale> productSales;
     private String userName;
-    private int userPhoneNumber;
+    private String userPhoneNumber;
     private int userPayment;
     private int totalPrice;
     private int totalChange;
