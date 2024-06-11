@@ -34,6 +34,8 @@ public class SaleService {
     @Autowired
     private StockService stockService;
     @Autowired
+    private NotificationService notificationService;
+    @Autowired
     private ProductSaleRepository productSaleRepository;
 
     @Transactional
@@ -46,9 +48,9 @@ public class SaleService {
 
         impactStockOnSaleOperation(sale, true);
 
-        saleRepository.save(sale);
+        Sale savedSale = saleRepository.save(sale);
 
-        return this.convertToDto(sale);
+        return this.convertToDto(savedSale);
     }
 
     public Page<SaleDto> getSales(String search, Date startDate, Date endDate, int page, int size) {
@@ -84,6 +86,8 @@ public class SaleService {
 
     public SaleDto convertToDto(Sale sale) {
         SaleDto saleDto = modelMapper.map(sale, SaleDto.class);
+        saleDto.setId(sale.getId());
+
         int totalProducts = 0;
         int totalSoldProducts = 0;
         for (ProductSaleDto productSale : saleDto.getProductSales()) {
@@ -125,6 +129,8 @@ public class SaleService {
                 }
 
                 stockService.editStock(stock, stock.getId());
+                notificationService.sendStockUpdateNotification(productSale.getProduct().getId(), stock.getCurrentStock());
+
             } else {
                 StockDto testerStock = stockService.getStocksByDateTodayAndProduct(productSale.getTesterProduct());
 
@@ -164,6 +170,8 @@ public class SaleService {
 
                 stockService.editStock(stock, stock.getId());
                 stockService.editStock(testerStock, testerStock.getId());
+
+                notificationService.sendStockUpdateNotification(productSale.getProduct().getId(), stock.getCurrentStock());
             }
             if (!isAddition) {
                 productSale.setDelete(true);

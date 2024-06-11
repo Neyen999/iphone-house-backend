@@ -18,7 +18,7 @@ public class ProductDto {
     private int initialCounterStock; // el de mostrador
     private int initialRegisterStock; // el de caja
     private boolean tester;
-    private int avaiableQuantity;
+    private int availableQuantity;
     private int totalSold;
 //    private StockDto stock;
 }
