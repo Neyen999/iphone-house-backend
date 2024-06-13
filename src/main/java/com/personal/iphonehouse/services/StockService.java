@@ -19,6 +19,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
@@ -37,7 +39,11 @@ public class StockService {
 
     @Transactional
     public StockDto saveStock(StockDto request) {
-        if (stockRepository.existsByProductIdAndDateCreatedAndIsDeleteFalse(request.getProduct().getId(), new DateUtil().utilDateNow())) {
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+
+        if (stockRepository.existsByProductIdAndDateCreatedAndIsDeleteFalse(
+                request.getProduct().getId(), startOfDay, endOfDay)) {
             throw new RuntimeException("Ya hay un stock para esta fecha y para este producto");
         }
 
@@ -50,9 +56,9 @@ public class StockService {
 
         // el stock final se calcula al final del día, pueden agregarlo manualmente o hay un runner que lo ejecuta.
 
-        stockRepository.save(stock);
+        Stock savedStock = stockRepository.save(stock);
 
-        return modelMapper.map(stock, StockDto.class);
+        return modelMapper.map(savedStock, StockDto.class);
     }
 
     public StockDto getStock(Integer id) {
@@ -61,50 +67,40 @@ public class StockService {
         return modelMapper.map(stock, StockDto.class);
     }
 
-    public List<Stock> getStocksByDate(Date date) {
-        return stockRepository.findByDateCreatedAndIsDeleteFalse(date);
+    public List<Stock> getStocksByDate(LocalDateTime dateTime) {
+        LocalDate date = dateTime.toLocalDate();
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+        return stockRepository.findByDateCreatedAndIsDeleteFalse(startOfDay, endOfDay);
     }
 
     public StockDto getStocksByDateTodayAndProduct(Product product) {
         LocalDate today = LocalDate.now(ZoneId.of("America/Argentina/Buenos_Aires"));
-        Date now = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
 
-
-
-        Stock stock = stockRepository.findByDateCreatedAndProductAndIsDeleteFalse(now, product);
-
+        Stock stock = stockRepository.findByDateCreatedBetweenAndProductAndIsDeleteFalse(startOfDay, endOfDay, product);
 
         return stock != null ? convertToDto(stock) : null;
     }
 
-    public Page<StockDto> getAllStockByIdAnd(String search,
-                                             Date desiredDate,
-                                             int page,
-                                             int size) {
+
+    public Page<StockDto> getAllStock(String search, LocalDate desiredDate, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
-        if (desiredDate == null) {
-            desiredDate = new Date(); // Usa la fecha actual si no se proporciona una
-        }
+        LocalDate date = desiredDate != null ? desiredDate : LocalDate.now(ZoneId.of("America/Argentina/Buenos_Aires"));
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
 
-        LocalDate localDesiredDate = desiredDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate startDate = localDesiredDate.minusDays(1);
-        LocalDate endDate = localDesiredDate.plusDays(1);
-
-        Date start = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        Date end = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-
-        Page<Stock> stockPage = stockRepository.searchStock(search,
-                start,
-                end,
-                pageable);
+        Page<Stock> stockPage = stockRepository.searchStock(search, startOfDay, endOfDay, pageable);
 
         List<StockDto> stockDtos = stockPage.getContent().stream()
-                .map(this::convertToDto) // Implementa esta función para convertir a DTO
+                .map(this::convertToDto)
                 .toList();
 
         return new PageImpl<>(stockDtos, pageable, stockPage.getTotalElements());
     }
+
 
     @Transactional
     public StockDto editStock(StockDto request, Integer id) {
@@ -114,7 +110,7 @@ public class StockService {
         stock.setFinalStock(request.getFinalStock());
         stock.setCounterReposition(request.getCounterReposition());
         stock.setRegisterReposition(request.getRegisterReposition());
-        stock.setDateUpdated(new DateUtil().utilDateNow());
+        stock.setDateUpdated(LocalDateTime.now());
         stock.setRegisterSales(request.getRegisterSales());
         stock.setCounterSales(request.getCounterSales());
 
@@ -127,7 +123,7 @@ public class StockService {
         return modelMapper.map(stock, StockDto.class);
     }
 
-    public Optional<Date> getLastStockDate() {
+    public Optional<LocalDateTime> getLastStockDate() {
         return stockRepository.findTopByIsDeleteFalseOrderByDateCreatedDesc()
                 .map(Stock::getDateCreated);
     }

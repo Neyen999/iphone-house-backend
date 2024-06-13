@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
@@ -83,24 +84,25 @@ public class StockGenerationService {
         LocalDate today = LocalDate.now(ZoneId.of("America/Argentina/Buenos_Aires"));
 
         // Obtener la última fecha con registros de stock
-        Optional<Date> lastStockDateOptional = stockService.getLastStockDate();
+        Optional<LocalDateTime> lastStockDateOptional = stockService.getLastStockDate();
+
 
         logger.info("Encontró algun stock por date? ");
         logger.info(String.valueOf(lastStockDateOptional));
 
         if (lastStockDateOptional.isEmpty()) {
-            // Si no hay stocks previos, salir del método
+//          Si no hay stocks previos, salir del método
             return;
         }
 
 
 
 //        Date lastStockDate = lastStockDateOptional.get();
-        LocalDate lastStockLocalDate = lastStockDateOptional.get().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        Date date = Date.from(lastStockLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+//        LocalDate lastStockLocalDate = lastStockDateOptional.get().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+//        Date date = Date.from(lastStockLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
         // Obtener los stocks de la última fecha registrada
-        List<Stock> stocks = stockService.getStocksByDate(date);
+        List<Stock> stocks = stockService.getStocksByDate(lastStockDateOptional.get());
 
         // Crear los nuevos stocks basados en los viejos stocks
         for (Stock stock : stocks) {

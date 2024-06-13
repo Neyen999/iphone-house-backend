@@ -9,6 +9,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,7 +48,7 @@ public class CategoryService {
 
         Category category = categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Error"));
         category.setName(request.getName());
-        category.setDateUpdated(new DateUtil().utilDateNow());
+        category.setDateUpdated(LocalDateTime.now());
 
         categoryRepository.save(category);
 

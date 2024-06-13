@@ -9,6 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -27,10 +28,10 @@ public class StockController {
 
     @GetMapping("/stocks")
     public ResponseEntity<Page<StockDto>> getAllStocks(@RequestParam(value = "search", defaultValue = "", required = false) String search,
-                                                       @RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date desiredDate,
+                                                       @RequestParam(name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desiredDate,
                                                        @RequestParam(value = "page", defaultValue = "0") int page,
                                                        @RequestParam(value = "size", defaultValue = "10") int size) {
-        return ResponseEntity.ok(stockService.getAllStockByIdAnd(search, desiredDate, page, size));
+        return ResponseEntity.ok(stockService.getAllStock(search, desiredDate, page, size));
     }
 
     @PostMapping("/stockGeneration")

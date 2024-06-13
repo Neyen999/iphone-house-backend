@@ -1,31 +1,43 @@
 package com.personal.iphonehouse.models;
 
-import com.personal.iphonehouse.utils.DateUtil;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
+@Entity
+@Table(name = "prueba_fechas")
 @Getter
 @Setter
 @NoArgsConstructor
-@MappedSuperclass
-public abstract class EntityBase<T> {
+@AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
+public class PruebaFecha {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private T id;
-    private boolean isDelete;
+    private Long id;
+
     @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime dateCreated;
+
     @LastModifiedDate
     private LocalDateTime dateUpdated;
 
+    private String value;
+    // Otros campos...
+
     @PrePersist
-    void initializeDate() {
+    protected void onCreate() {
         dateCreated = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        dateUpdated = LocalDateTime.now();
     }
 }

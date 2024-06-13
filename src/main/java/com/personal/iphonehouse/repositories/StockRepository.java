@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -28,16 +29,26 @@ public interface StockRepository extends JpaRepository<Stock, Integer> {
             "CAST(s.registerSales AS string) LIKE CONCAT('%', :search, '%') OR " +
             "CAST(s.counterSales AS string) LIKE CONCAT('%', :search, '%') OR " +
             "CAST(s.finalStock AS string) LIKE CONCAT('%', :search, '%')) " +
-            "AND s.dateCreated > :startDate AND s.dateCreated < :endDate "  + "AND s.isDelete = false")
+            "AND s.dateCreated BETWEEN :startDate AND :endDate " +
+            "AND s.isDelete = false")
     Page<Stock> searchStock(@Param("search") String search,
-                            @Param("startDate") Date startDate,
-                            @Param("endDate") Date endDate,
+                            @Param("startDate") LocalDateTime startDate,
+                            @Param("endDate") LocalDateTime endDate,
                             Pageable pageable);
-    Stock findByDateCreatedAndProductAndIsDeleteFalse(Date date, Product product);
+
+    @Query("SELECT s FROM Stock s WHERE s.dateCreated BETWEEN :startOfDay AND :endOfDay AND s.product = :product AND s.isDelete = false")
+    Stock findByDateCreatedBetweenAndProductAndIsDeleteFalse(@Param("startOfDay") LocalDateTime startOfDay, @Param("endOfDay") LocalDateTime endOfDay, @Param("product") Product product);
+
     List<Stock> findByProduct(Product product);
-    boolean existsByProductIdAndDateCreatedAndIsDeleteFalse(Integer productId, Date dateCreated);
-    @Query("SELECT s FROM Stock s WHERE s.dateCreated = :date AND s.isDelete = false")
-    List<Stock> findByDateCreatedAndIsDeleteFalse(@Param("date") Date date);
+//    boolean existsByProductIdAndDateCreatedAndIsDeleteFalse(Integer productId, LocalDateTime dateCreated);
+    @Query("SELECT COUNT(s) > 0 FROM Stock s WHERE s.product.id = :productId AND s.dateCreated BETWEEN :startOfDay AND :endOfDay AND s.isDelete = false")
+    boolean existsByProductIdAndDateCreatedAndIsDeleteFalse(@Param("productId") Integer productId,
+                                                            @Param("startOfDay") LocalDateTime startOfDay,
+                                                            @Param("endOfDay") LocalDateTime endOfDay);
+    @Query("SELECT s FROM Stock s WHERE s.dateCreated BETWEEN :startOfDay AND :endOfDay AND s.isDelete = false")
+    List<Stock> findByDateCreatedAndIsDeleteFalse(
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("endOfDay") LocalDateTime endOfDay);
 
     Optional<Stock> findTopByIsDeleteFalseOrderByDateCreatedDesc();
 }
