@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Temporal;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -48,8 +49,8 @@ public interface SaleRepository extends JpaRepository<Sale, Integer> {
             "AND s.testerSale = false AND s.isDelete = false " +
             "ORDER BY s.dateCreated DESC, s.id DESC")
     Page<Sale> findSalesBySearchAndDateBetweenAndTesterSaleFalse(@Param("search") String search,
-                                                                 @Param("startDate") Date startDate,
-                                                                 @Param("endDate") Date endDate,
+                                                                 @Param("startDate") LocalDateTime startDate,
+                                                                 @Param("endDate") LocalDateTime endDate,
                                                                  Pageable pageable);
 
 }

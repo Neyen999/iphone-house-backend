@@ -20,6 +20,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
@@ -53,10 +55,13 @@ public class SaleService {
         return this.convertToDto(savedSale);
     }
 
-    public Page<SaleDto> getSales(String search, Date startDate, Date endDate, int page, int size) {
+    public Page<SaleDto> getSales(String search, LocalDate startDate, LocalDate endDate, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<Sale> salesPage = saleRepository.findSalesBySearchAndDateBetweenAndTesterSaleFalse(search, startDate, endDate, pageable);
+        LocalDateTime startOfDay = startDate != null ? startDate.atStartOfDay() : null;
+        LocalDateTime endOfDay = endDate != null ? endDate.atTime(LocalTime.MAX) : null;
+
+        Page<Sale> salesPage = saleRepository.findSalesBySearchAndDateBetweenAndTesterSaleFalse(search, startOfDay, endOfDay, pageable);
 
         List<SaleDto> salesDtoList = salesPage.stream()
                 .map(this::convertToDto)
@@ -179,31 +184,5 @@ public class SaleService {
             }
         }
     }
-
-//    public void addOrSubtractFromSotck(ProductSale productSale, Stock originStock, Stock testerStock, boolean isAddition) {
-//        if (productSale.getCounterQuantity() > 0) {
-//            if (isAddition && productSale.getCounterQuantity() > stock.getCurrentCounterStock()) {
-//                throw new RuntimeException("Stock insuficiente");
-//            }
-//
-//
-//            int newCounterSales = isAddition
-//                    ? stock.getCounterSales() + productSale.getCounterQuantity()
-//                    : stock.getCounterSales() - productSale.getCounterQuantity();
-//            stock.setCounterSales(newCounterSales);
-//        }
-//
-//        if (productSale.getRegisterQuantity() > 0) {
-//            if (isAddition && productSale.getRegisterQuantity() > stock.getCurrentRegisterStock()) {
-//                throw new RuntimeException("Stock insuficiente");
-//            }
-//
-//            int newRegisterSales = isAddition
-//                    ? stock.getRegisterSales() + productSale.getRegisterQuantity()
-//                    : stock.getRegisterSales() - productSale.getRegisterQuantity();
-//            stock.setRegisterSales(newRegisterSales);
-//        }
-//
-//    }
 
 }

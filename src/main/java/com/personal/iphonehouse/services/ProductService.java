@@ -80,10 +80,7 @@ public class ProductService {
     }
 
     public List<ProductDto> getAllProducts(String search) {
-        List<Product> products = productRepository.findBySearchAndIsDeleteFalseAndDateBetween(search);
-
-        // todo:
-        //  el frontend solo en el guardar te da la opción de cargar una cantidad de productos que impactan en el stock
+        List<Product> products = productRepository.findBySearchAndIsDeleteFalse(search);
 
         return products.stream()
                 .map(this::convertToDto)
