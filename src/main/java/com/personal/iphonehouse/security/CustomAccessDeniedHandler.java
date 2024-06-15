@@ -10,6 +10,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Order(2)
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
@@ -20,16 +22,16 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         // Set the content type to JSON
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        // Write the exception message to the response body
-        ObjectMapper objectMapper = new ObjectMapper();
-        // Create a custom exception object
-//        CustomException customException = new CustomException(accessDeniedException, HttpStatus.FORBIDDEN);
-//        customException.setErrorCode(403);
-        RuntimeException exception = new RuntimeException("Acces denied code: 403");
-//         Convert the custom exception object to a JSON string
-        String json = objectMapper.writeValueAsString(exception);
-//        String json = objectMapper.writeValueAsString(new Object());
-        response.getWriter().write(json);
 
+        // Create a map to hold the exception details
+        Map<String, Object> errorDetails = new HashMap<>();
+        errorDetails.put("message", "Access denied: code 403");
+        errorDetails.put("exception", accessDeniedException.getClass().getName());
+        errorDetails.put("stackTrace", accessDeniedException.getStackTrace());
+
+        // Write the exception details to the response body as JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(errorDetails);
+        response.getWriter().write(json);
     }
 }

@@ -1,7 +1,7 @@
 package com.personal.iphonehouse.security;
 
-import com.personal.iphonehouse.service.JwtService;
-import com.personal.iphonehouse.service.UserDetailsServiceImpl;
+import com.personal.iphonehouse.services.JwtService;
+import com.personal.iphonehouse.services.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

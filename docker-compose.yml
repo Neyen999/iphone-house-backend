@@ -1,45 +1,35 @@
 version: "3.8"
 services:
   db:
-    image: mysql:5.7
-    container_name: mysql_iphonehouse
+    image: postgres:16.3
+    container_name: postgres_iphonehouse
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: 'root'
+      POSTGRES_PASSWORD: 'root'
+      POSTGRES_USER: 'root'  # PostgreSQL default superuser
+      POSTGRES_DB: 'iphone_house'  # Default database to connect to
+#      PGPORT: 3318
+#      PGUSER: 'root'
     ports:
-      - '3350:3306'
+      - '3318:5432'
     expose:
-      - '3306'
-    healthcheck:
-      test: [ "CMD", "mysqladmin" , "--password=root","ping", "-h", "localhost" ]
-      timeout: 40s
-      retries: 10
+      - '5432'
     volumes:
-          - ./db_data:/var/lib/mysql
-#          - ./db:/docker-entrypoint-initdb.d
-  phpmyadmin:
+      - ./db_data:/var/lib/postgresql/data
+      - ./dbpostgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d iphone_house"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+  pgadmin:
     depends_on:
       - db
-    image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin_management_system
+    image: dpage/pgadmin4
+    container_name: pgadmin
     restart: always
     ports:
       - '8095:80'
     environment:
-      PMA_HOST: db
-#  backend_system:
-#    container_name: backend_system
-#    build:
-#      context: ./
-#      dockerfile: Dockerfile
-#      args:
-#        PROFILE: docker
-#        DB_HOST: db
-#        DB_NAME: managment_system
-#        DB_USER: root
-#        DB_password: root
-#    ports:
-#      - 8099:8080
-#    depends_on:
-#      db:
-#        condition: service_healthy
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
