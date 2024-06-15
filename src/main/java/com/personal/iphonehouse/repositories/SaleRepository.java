@@ -37,20 +37,74 @@ public interface SaleRepository extends JpaRepository<Sale, Integer> {
 //    Page<Sale> findSalesBySearchAndDateBetweenAndTesterSaleFalse(@Param("search") String search,
 //                                                                 @Param("startDate") Date startDate,
 //                                                                 Pageable pageable);
+//    @Query("SELECT s FROM Sale s " +
+//            "WHERE (:search IS NULL OR LOWER(s.userName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+//            "OR :search IS NULL OR CAST(s.userPhoneNumber AS string) LIKE CONCAT('%', :search, '%')) " +
+//            "AND ( " +
+//            "(:startDate IS NULL AND :endDate IS NULL) " +
+//            "OR (:startDate IS NOT NULL AND :endDate IS NULL AND s.dateCreated = :startDate) " +
+//            "OR (:startDate IS NULL AND :endDate IS NOT NULL AND s.dateCreated = :endDate) " +
+//            "OR (:startDate IS NOT NULL AND :endDate IS NOT NULL AND s.dateCreated BETWEEN :startDate AND :endDate) " +
+//            ") " +
+//            "AND s.testerSale = false AND s.isDelete = false " +
+//            "ORDER BY s.dateCreated DESC, s.id DESC")
+//    Page<Sale> findSalesBySearchAndDateBetweenAndTesterSaleFalse(@Param("search") String search,
+//                                                                 @Param("startDate") LocalDateTime startDate,
+//                                                                 @Param("endDate") LocalDateTime endDate,
+//                                                                 Pageable pageable);
+//@Query("SELECT s FROM Sale s " +
+//        "WHERE (LOWER(s.userName) LIKE LOWER(CONCAT('%', :search, '%')) OR :search IS NULL " +
+//        "OR CAST(s.userPhoneNumber AS string) LIKE CONCAT('%', :search, '%')) " +
+//        "AND ( " +
+//        "(:startDate IS NULL AND :endDate IS NULL) " +
+//        "OR (:startDate IS NOT NULL AND :endDate IS NULL AND s.dateCreated = :startDate) " +
+//        "OR (:startDate IS NULL AND :endDate IS NOT NULL AND s.dateCreated = :endDate) " +
+//        "OR (:startDate IS NOT NULL AND :endDate IS NOT NULL AND s.dateCreated BETWEEN :startDate AND :endDate) " +
+//        ") " +
+//        "AND s.testerSale = false AND s.isDelete = false " +
+//        "ORDER BY s.dateCreated DESC, s.id DESC")
+//Page<Sale> findSalesBySearchAndDateBetweenAndTesterSaleFalse(@Param("search") String search,
+//                                                             @Param("startDate") LocalDateTime startDate,
+//                                                             @Param("endDate") LocalDateTime endDate,
+//                                                             Pageable pageable);
+@Query("SELECT s FROM Sale s " +
+        "WHERE (LOWER(s.userName) LIKE LOWER(CONCAT('%', :search, '%')) OR :search IS NULL " +
+        "OR CAST(s.userPhoneNumber AS string) LIKE CONCAT('%', :search, '%')) " +
+        "AND s.testerSale = false AND s.isDelete = false " +
+        "ORDER BY s.dateCreated DESC, s.id DESC")
+Page<Sale> findSalesBySearch(@Param("search") String search, Pageable pageable);
+
     @Query("SELECT s FROM Sale s " +
-            "WHERE (:search IS NULL OR LOWER(s.userName) LIKE LOWER(CONCAT('%', :search, '%')) " +
-            "OR :search IS NULL OR CAST(s.userPhoneNumber AS string) LIKE CONCAT('%', :search, '%')) " +
-            "AND ( " +
-            "(:startDate IS NULL AND :endDate IS NULL) " +
-            "OR (:startDate IS NOT NULL AND :endDate IS NULL AND s.dateCreated = :startDate) " +
-            "OR (:startDate IS NULL AND :endDate IS NOT NULL AND s.dateCreated = :endDate) " +
-            "OR (:startDate IS NOT NULL AND :endDate IS NOT NULL AND s.dateCreated BETWEEN :startDate AND :endDate) " +
-            ") " +
+            "WHERE (LOWER(s.userName) LIKE LOWER(CONCAT('%', :search, '%')) OR :search IS NULL " +
+            "OR CAST(s.userPhoneNumber AS string) LIKE CONCAT('%', :search, '%')) " +
+            "AND s.dateCreated >= :startDate " +
             "AND s.testerSale = false AND s.isDelete = false " +
             "ORDER BY s.dateCreated DESC, s.id DESC")
-    Page<Sale> findSalesBySearchAndDateBetweenAndTesterSaleFalse(@Param("search") String search,
-                                                                 @Param("startDate") LocalDateTime startDate,
-                                                                 @Param("endDate") LocalDateTime endDate,
-                                                                 Pageable pageable);
+    Page<Sale> findSalesBySearchAndStartDate(@Param("search") String search,
+                                             @Param("startDate") LocalDateTime startDate,
+                                             Pageable pageable);
+
+    @Query("SELECT s FROM Sale s " +
+            "WHERE (LOWER(s.userName) LIKE LOWER(CONCAT('%', :search, '%')) OR :search IS NULL " +
+            "OR CAST(s.userPhoneNumber AS string) LIKE CONCAT('%', :search, '%')) " +
+            "AND s.dateCreated <= :endDate " +
+            "AND s.testerSale = false AND s.isDelete = false " +
+            "ORDER BY s.dateCreated DESC, s.id DESC")
+    Page<Sale> findSalesBySearchAndEndDate(@Param("search") String search,
+                                           @Param("endDate") LocalDateTime endDate,
+                                           Pageable pageable);
+
+    @Query("SELECT s FROM Sale s " +
+            "WHERE (LOWER(s.userName) LIKE LOWER(CONCAT('%', :search, '%')) OR :search IS NULL " +
+            "OR CAST(s.userPhoneNumber AS string) LIKE CONCAT('%', :search, '%')) " +
+            "AND s.dateCreated BETWEEN :startDate AND :endDate " +
+            "AND s.testerSale = false AND s.isDelete = false " +
+            "ORDER BY s.dateCreated DESC, s.id DESC")
+    Page<Sale> findSalesBySearchAndDateBetween(@Param("search") String search,
+                                               @Param("startDate") LocalDateTime startDate,
+                                               @Param("endDate") LocalDateTime endDate,
+                                               Pageable pageable);
+
+
 
 }

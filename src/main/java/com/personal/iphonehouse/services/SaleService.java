@@ -61,7 +61,17 @@ public class SaleService {
         LocalDateTime startOfDay = startDate != null ? startDate.atStartOfDay() : null;
         LocalDateTime endOfDay = endDate != null ? endDate.atTime(LocalTime.MAX) : null;
 
-        Page<Sale> salesPage = saleRepository.findSalesBySearchAndDateBetweenAndTesterSaleFalse(search, startOfDay, endOfDay, pageable);
+        Page<Sale> salesPage;
+
+        if (startOfDay == null && endOfDay == null) {
+            salesPage = saleRepository.findSalesBySearch(search.isEmpty() ? null : search, pageable);
+        } else if (startOfDay != null && endOfDay == null) {
+            salesPage = saleRepository.findSalesBySearchAndStartDate(search.isEmpty() ? null : search, startOfDay, pageable);
+        } else if (startOfDay == null) {
+            salesPage = saleRepository.findSalesBySearchAndEndDate(search.isEmpty() ? null : search, endOfDay, pageable);
+        } else {
+            salesPage = saleRepository.findSalesBySearchAndDateBetween(search.isEmpty() ? null : search, startOfDay, endOfDay, pageable);
+        }
 
         List<SaleDto> salesDtoList = salesPage.stream()
                 .map(this::convertToDto)
@@ -69,6 +79,8 @@ public class SaleService {
 
         return new PageImpl<>(salesDtoList, pageable, salesPage.getTotalElements());
     }
+
+
 
     public int getTotalSalesByProduct(Product product) {
         List<ProductSale> productSales = productSaleRepository.findByProductAndIsDeleteFalse(product);

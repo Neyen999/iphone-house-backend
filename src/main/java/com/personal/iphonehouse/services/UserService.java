@@ -74,6 +74,8 @@ public class UserService {
         Role role = roleRepository.findById(1).orElseThrow(() -> new RuntimeException("Error"));
 
         User newUser = modelMapper.map(registerRequestDto, User.class);
+        newUser.setName("Neyen");
+        newUser.setLastName("Marinelli");
         newUser.setPassword(passwordEncoder.encode(registerRequestDto.getPassword()));
         newUser.setRoles(List.of(role));
         userRepository.save(newUser);
