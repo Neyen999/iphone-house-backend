@@ -20,5 +20,7 @@ public class ProductDto {
     private boolean tester;
     private int availableQuantity;
     private int totalSold;
+    private int availableRegisterQuantity;
+    private int availableCounterQuantity;
 //    private StockDto stock;
 }

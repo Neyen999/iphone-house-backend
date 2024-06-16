@@ -2,9 +2,11 @@ package com.personal.iphonehouse.controllers;
 
 import com.personal.iphonehouse.dtos.JwtResponseDTO;
 import com.personal.iphonehouse.dtos.LoginRequest;
+import com.personal.iphonehouse.dtos.ResetPasswordDto;
 import com.personal.iphonehouse.dtos.UserDTO;
 import com.personal.iphonehouse.services.JwtService;
 import com.personal.iphonehouse.services.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +41,17 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refreshJwt")
-    public ResponseEntity<JwtResponseDTO> refreshJwt(@RequestBody JwtResponseDTO tokenRequest) {
-        return ResponseEntity.ok(jwtService.refreshJwt(tokenRequest.getToken()));
+    public ResponseEntity<JwtResponseDTO> refreshJwt(HttpServletRequest req) {
+        return ResponseEntity.ok(jwtService.refreshJwt(req));
     }
+
+    @PutMapping("/resetPassword")
+    public ResponseEntity<Boolean> resetPassword(HttpServletRequest req, @RequestBody ResetPasswordDto resetPasswordDto) {
+        return ResponseEntity.ok(userService.resetPassword(req, resetPasswordDto));
+    }
+
+//    @PutMapping("/changePassword")
+//    public ResponseEntity<Boolean> changePassword(HttpServletRequest req, @RequestBody ResetPasswordDto resetPasswordDto) {
+//        return ResponseEntity.ok(userService.resetPassword(req, resetPasswordDto));
+//    }
 }

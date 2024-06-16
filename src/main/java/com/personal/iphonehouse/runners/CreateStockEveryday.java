@@ -7,7 +7,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 //@Component
-//public class CreateStockEveryday {
+//public class CreateStockEveryday implements CommandLineRunner {
 //    @Autowired
 //    private StockGenerationService stockGenerationService;
 //

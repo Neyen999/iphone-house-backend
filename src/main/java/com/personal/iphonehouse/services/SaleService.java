@@ -146,7 +146,7 @@ public class SaleService {
                 }
 
                 stockService.editStock(stock, stock.getId());
-                notificationService.sendStockUpdateNotification(productSale.getProduct().getId(), stock.getCurrentStock());
+                notificationService.sendStockUpdateNotification(productSale.getProduct().getId(), stock.getCurrentStock(), stock.getCurrentRegisterStock(), stock.getCurrentCounterStock());
 
             } else {
                 StockDto testerStock = stockService.getStocksByDateTodayAndProduct(productSale.getTesterProduct());
@@ -188,7 +188,7 @@ public class SaleService {
                 stockService.editStock(stock, stock.getId());
                 stockService.editStock(testerStock, testerStock.getId());
 
-                notificationService.sendStockUpdateNotification(productSale.getProduct().getId(), stock.getCurrentStock());
+                notificationService.sendStockUpdateNotification(productSale.getProduct().getId(), stock.getCurrentStock(), stock.getCurrentRegisterStock(), stock.getCurrentCounterStock());
             }
             if (!isAddition) {
                 productSale.setDelete(true);

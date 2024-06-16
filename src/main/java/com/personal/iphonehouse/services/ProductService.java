@@ -52,7 +52,7 @@ public class ProductService {
         stockRequest.setInitialStock(request.getInitialStock());
         stockRequest.setInitialRegisterStock(request.getInitialRegisterStock());
         stockRequest.setInitialCounterStock(request.getInitialCounterStock());
-        stockRequest.setProduct(new ProductSimpleDto(product.getId(), product.getName(), modelMapper.map(product.getCategory(), CategoryDto.class), product.isTester(), 0));
+        stockRequest.setProduct(new ProductSimpleDto(product.getId(), product.getName(), modelMapper.map(product.getCategory(), CategoryDto.class), product.isTester(), 0, 0, 0));
         stockRequest.setTester(request.isTester());
 
         stockService.saveStock(stockRequest);
@@ -152,8 +152,11 @@ public class ProductService {
         StockDto stock = stockService.getStocksByDateTodayAndProduct(product);
         int totalSold = saleService.getTotalSalesByProduct(product);
 
-        if (stock != null)
+        if (stock != null) {
             productDto.setAvailableQuantity(stock.getCurrentStock());
+            productDto.setAvailableRegisterQuantity(stock.getCurrentRegisterStock());
+            productDto.setAvailableCounterQuantity(stock.getCurrentCounterStock());
+        }
 
         productDto.setTotalSold(totalSold);
 

@@ -15,4 +15,6 @@ public class ProductSimpleDto {
     private CategoryDto category;
     private boolean tester;
     private int availableQuantity;
+    private int availableRegisterQuantity;
+    private int availableCounterQuantity;
 }

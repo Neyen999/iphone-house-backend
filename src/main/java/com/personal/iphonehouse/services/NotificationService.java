@@ -1,5 +1,9 @@
 package com.personal.iphonehouse.services;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,26 +16,19 @@ public class NotificationService {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    public void sendStockUpdateNotification(Integer productId, int newStock) {
+    public void sendStockUpdateNotification(Integer productId, int newStock, int newRegisterStock, int newCounterStock) {
         logger.info("Sending message to product: " + productId + " with new stock quantity of: " + newStock);
-        messagingTemplate.convertAndSend("/topic/stock-updates", new StockUpdateMessage(productId, newStock));
+        messagingTemplate.convertAndSend("/topic/stock-updates", new StockUpdateMessage(productId, newStock, newRegisterStock, newCounterStock));
     }
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class StockUpdateMessage {
         private Integer productId;
         private int newStock;
-
-        public StockUpdateMessage(Integer productId, int newStock) {
-            this.productId = productId;
-            this.newStock = newStock;
-        }
-
-        public Integer getProductId() {
-            return productId;
-        }
-
-        public int getNewStock() {
-            return newStock;
-        }
+        private int newRegisterStock;
+        private int newCounterStock;
     }
 }

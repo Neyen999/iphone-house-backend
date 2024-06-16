@@ -21,7 +21,8 @@ import java.util.function.Function;
 @Service
 public class JwtService {
     public static final String SECRET = "958c4cc9eab74ebd6596777715a7896a3f9f2352c53fa4fd2a215f0fc022b7d0";
-    public static final int EXPIRATION_TIME = 1000 * 60 * 60 * 12;
+    public static final int EXPIRATION_TIME = 1000 * 60 * 60 * 12; // 12 horas
+//    public static final int EXPIRATION_TIME = 1000 * 60 * 5;
     // TODO Poner el tiempo de vencimiento que va
 //    public static final int EXPIRATION_TIME = 1000 * 60 * 60; // 1 hora
 //    public static final int EXPIRATION_TIME = 1000 * 60; // 1 min
@@ -107,20 +108,18 @@ public class JwtService {
         return accessToken;
     }
 
-    public JwtResponseDTO refreshJwt(String token) {
+    public JwtResponseDTO refreshJwt(HttpServletRequest req) {
+        String token = obtainTokenFromHeader(req);
         // 1. Verify the token
         Claims claims = parseToken(token);
-
         // 2. Extract the subject (userId) from the claims
         String username = claims.getSubject();
 
         // 3. Create a new token with a new expiration date
 //        Map<String, Object> claims = new HashMap<>();
-        Date expiration = new Date(System.currentTimeMillis() * EXPIRATION_TIME);
-        String newToken = createToken(claims, username, expiration);
+//        Date expiration = new Date(System.currentTimeMillis() * EXPIRATION_TIME);
+        return GenerateToken(username);
 
-        // 4. Return the new token and expiration date
-        return new JwtResponseDTO(newToken, expiration);
     }
 
     private Claims parseToken(String token) {

@@ -2,6 +2,7 @@ package com.personal.iphonehouse.services;
 
 import com.personal.iphonehouse.dtos.JwtResponseDTO;
 import com.personal.iphonehouse.dtos.LoginRequest;
+import com.personal.iphonehouse.dtos.ResetPasswordDto;
 import com.personal.iphonehouse.dtos.UserDTO;
 import com.personal.iphonehouse.models.Role;
 import com.personal.iphonehouse.models.User;
@@ -17,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -42,13 +44,13 @@ public class UserService {
         return user;
     }
 
-    public UserDTO findByUsername(String username) {
+    public User findByUsername(String username) {
         User user = userRepository.findByUsername(username);
         if (user == null) {
             throw new RuntimeException("No hay");
         }
 
-        return modelMapper.map(user, UserDTO.class);
+        return user;
 
     }
 
@@ -121,10 +123,48 @@ public class UserService {
 //        return user != null;
 //    }
 
-    public UserDTO getLoggedUser(HttpServletRequest req) {
+    public User getLoggedUser(HttpServletRequest req) {
         String token = jwtService.obtainTokenFromHeader(req);
         String username = jwtService.extractUsername(token);
 
         return this.findByUsername(username);
     }
+
+    @Transactional
+    public Boolean resetPassword(HttpServletRequest req, ResetPasswordDto resetPasswordDto) {
+        User user = getLoggedUser(req);
+
+        // Verificar si la contraseña antigua coincide
+        if (!passwordEncoder.matches(resetPasswordDto.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("La contraseña antigua no es correcta");
+        }
+
+        System.out.println("NO rompio");
+        // Actualizar la contraseña
+        user.setDateUpdated(LocalDateTime.now());
+        user.setPassword(passwordEncoder.encode(resetPasswordDto.getNewPassword()));
+        userRepository.save(user);
+
+        return true;
+
+    }
+
+//    @Transactional
+//    public Boolean resetPassword(HttpServletRequest req, ResetPasswordDto resetPasswordDto) {
+//        User user = userRepository.findByUsername("neyen_gt@hotmail.com");
+//
+//        // Verificar si la contraseña antigua coincide
+////        if (!passwordEncoder.matches(resetPasswordDto.getOldPassword(), user.getPassword())) {
+////            throw new IllegalArgumentException("La contraseña antigua no es correcta");
+////        }
+//
+//        System.out.println("NO rompio");
+//        // Actualizar la contraseña
+//        user.setDateUpdated(LocalDateTime.now());
+//        user.setPassword(passwordEncoder.encode(resetPasswordDto.getNewPassword()));
+//        userRepository.save(user);
+//
+//        return true;
+//
+//    }
 }
