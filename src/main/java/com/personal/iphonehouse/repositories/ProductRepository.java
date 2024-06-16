@@ -12,12 +12,12 @@ import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer> {
-    boolean existsByNameIgnoreCase(String name);
+    boolean existsByNameIgnoreCaseAndIsDeleteFalse(String name);
     @Query("SELECT pr FROM Product pr " +
             "WHERE (:search IS NULL OR " +
             "LOWER(pr.name) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
             "LOWER(pr.category.name) LIKE LOWER(CONCAT('%', :search, '%'))) " +
             "AND pr.isDelete = false")
     List<Product> findBySearchAndIsDeleteFalse(@Param("search") String search);
-    Optional<Product> findByNameEqualsIgnoreCase(String name);
+    Optional<Product> findByNameEqualsIgnoreCaseAndIsDeleteFalse(String name);
 }

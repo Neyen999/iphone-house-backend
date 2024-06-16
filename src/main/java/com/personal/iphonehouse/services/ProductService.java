@@ -39,7 +39,7 @@ public class ProductService {
 
     @Transactional
     public ProductDto saveProduct(ProductDto request) {
-        if (productRepository.existsByNameIgnoreCase(request.getName()))
+        if (productRepository.existsByNameIgnoreCaseAndIsDeleteFalse(request.getName()))
             throw new RuntimeException("Producto existente");
         Product product = modelMapper.map(request, Product.class);
 
@@ -93,7 +93,7 @@ public class ProductService {
         Product testerProduct = null;
         Category category = null;
 
-        if (productRepository.existsByNameIgnoreCase(request.getName())) {
+        if (productRepository.existsByNameIgnoreCaseAndIsDeleteFalse(request.getName())) {
             throw new RuntimeException("Nombre en uso");
         }
 
@@ -107,9 +107,9 @@ public class ProductService {
 
         productRepository.save(product);
 
-        if (productRepository.existsByNameIgnoreCase(product.getName() + "(TESTER)")) {
+        if (productRepository.existsByNameIgnoreCaseAndIsDeleteFalse(product.getName() + "(TESTER)")) {
             testerProduct = productRepository
-                    .findByNameEqualsIgnoreCase(product.getName() + "(TESTER)").orElseThrow(() -> new RuntimeException("Error"));
+                    .findByNameEqualsIgnoreCaseAndIsDeleteFalse(product.getName() + "(TESTER)").orElseThrow(() -> new RuntimeException("Error"));
         }
 
         if (testerProduct != null) {
@@ -124,8 +124,8 @@ public class ProductService {
 
     @Transactional
     public List<ProductDto> deleteProduct(String name) {
-        Product product = productRepository.findByNameEqualsIgnoreCase(name).orElseThrow(() -> new RuntimeException("Error"));
-        Optional<Product> productTester = productRepository.findByNameEqualsIgnoreCase(name + " (TESTER)");
+        Product product = productRepository.findByNameEqualsIgnoreCaseAndIsDeleteFalse(name).orElseThrow(() -> new RuntimeException("Error"));
+        Optional<Product> productTester = productRepository.findByNameEqualsIgnoreCaseAndIsDeleteFalse(name + " (TESTER)");
         List<ProductDto> deletedProducts = new ArrayList<>();
 
         stockService.deleteStocksByProduct(stockService.stocksByProduct(product));

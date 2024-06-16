@@ -1,5 +1,6 @@
 package com.personal.iphonehouse.models;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -20,6 +21,8 @@ public class ProductSale extends EntityBase<Integer> {
     // Producto de donde se ha sustraído el stock, en caso de que product sea tester
     @ManyToOne(optional = true)
     private Product testerProduct;
+    @Column(columnDefinition = "integer")
     private int registerQuantity;
+    @Column(columnDefinition = "integer")
     private int counterQuantity;
 }

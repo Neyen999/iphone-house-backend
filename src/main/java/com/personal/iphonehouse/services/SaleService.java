@@ -42,7 +42,9 @@ public class SaleService {
 
     @Transactional
     public SaleDto saveSale(SaleDto request) {
+        int saleNumber = saleRepository.getSaleOrder();
         Sale sale = modelMapper.map(request, Sale.class);
+        sale.setSaleCount(saleNumber + 1);
         // ahora tengo que hacer una lógica donde actualizo el stock en base a la venta de un producto
         // 1- Busco al stock del día de hoy según por product que quiera vender
         // 2- Según la cantidad de registerQuantity o counterQuantity, tengo que sumarle al stock

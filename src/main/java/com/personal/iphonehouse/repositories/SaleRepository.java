@@ -105,6 +105,7 @@ Page<Sale> findSalesBySearch(@Param("search") String search, Pageable pageable);
                                                @Param("endDate") LocalDateTime endDate,
                                                Pageable pageable);
 
-
+    @Query("SELECT COUNT(s) FROM Sale s")
+    int getSaleOrder();
 
 }

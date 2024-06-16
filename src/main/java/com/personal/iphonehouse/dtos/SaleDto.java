@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -25,5 +26,6 @@ public class SaleDto {
     private int totalChange;
     private boolean testerSale;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    private Date dateCreated;
+    private LocalDateTime dateCreated;
+    private int saleCount;
 }

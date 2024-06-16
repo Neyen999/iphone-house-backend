@@ -20,8 +20,13 @@ public class Sale extends EntityBase<Integer> {
     private List<ProductSale> productSales;
     private String userName;
     private String userPhoneNumber;
+    @Column(columnDefinition = "integer")
     private int userPayment;
+    @Column(columnDefinition = "integer")
     private int totalPrice;
+    @Column(columnDefinition = "integer")
     private int totalChange;
     private boolean testerSale;
+    @Column(columnDefinition = "integer")
+    private int saleCount;
 }
